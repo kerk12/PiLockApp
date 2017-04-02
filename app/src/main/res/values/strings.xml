@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PiLock</string>
+    <string name="server_address">PiLock Server</string>
+    <string name="core_settings">Core Settings</string>
 </resources>

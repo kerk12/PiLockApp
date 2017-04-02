@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/core_settings">
+        <EditTextPreference
+            android:defaultValue="none"
+            android:key="server_address"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/server_address" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
