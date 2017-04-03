@@ -14,8 +14,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,11 +27,22 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -44,11 +57,21 @@ public class LoginActivity extends AppCompatActivity {
 
         boolean failed = false;
         int failure = 0;
+        boolean CertFailure = false;
 
-        private String getResult(URL serverURL) throws IOException {
+        private String getResult(URL serverURL) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
             InputStream is = null;
 
+
+            SSLContext context = null;
+            try {
+                context = CustomSSLTruster.TrustCertificate("/storage/emulated/0/pilock.crt");
+            } catch (GeneralSecurityException e) {
+                CertFailure = true;
+            }
+
             HttpsURLConnection conn = (HttpsURLConnection) serverURL.openConnection();
+            conn.setSSLSocketFactory(context.getSocketFactory());
             conn.setConnectTimeout(5000);
             conn.setReadTimeout(10000);
             conn.setRequestMethod("POST");
@@ -102,6 +125,14 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 res = getResult(serverLoginURL);
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (CertificateException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
                 e.printStackTrace();
             }
 
