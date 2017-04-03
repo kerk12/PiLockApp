@@ -20,7 +20,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.settings);
-        EditTextPreference serverAddress = (EditTextPreference) getPreferenceScreen().findPreference("server_address");
+        EditTextPreference serverAddress = (EditTextPreference) getPreferenceScreen().findPreference(SettingsActivity.SERVER_ADDRESS_KEY);
         serverAddress.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {

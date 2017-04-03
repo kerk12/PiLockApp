@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PiLock.iml" filepath="$PROJECT_DIR$/PiLock.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PiLockApp.iml" filepath="$PROJECT_DIR$/PiLockApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

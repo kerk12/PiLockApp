@@ -2,4 +2,8 @@
     <string name="app_name">PiLock</string>
     <string name="server_address">PiLock Server</string>
     <string name="core_settings">Core Settings</string>
+    <string name="login_label">Please login to the server:</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
 </resources>
