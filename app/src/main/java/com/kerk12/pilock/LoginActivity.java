@@ -13,13 +13,18 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -60,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
     String password = null;
 
     String AuthToken = null;
+    String tempPIN = null;
 
     EditText usernameET, passwordET;
     Button loginButton;
@@ -159,6 +165,129 @@ public class LoginActivity extends AppCompatActivity {
 //        }
 //    }
 
+
+
+    private class LoginTask extends AsyncTask<Void, Void, String>{
+
+        private boolean HasErrors = false;
+        private int ResponseCode = 200;
+        private boolean CertError = false;
+
+        private String getResult() throws GeneralSecurityException, IOException {
+            InputStream is = null;
+
+            String serverURL = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
+            URL loginURL = new URL(serverURL + "/login");
+
+            HttpsURLConnection conn = (HttpsURLConnection) loginURL.openConnection();
+            conn.setSSLSocketFactory(CustomSSLTruster.TrustCertificate().getSocketFactory());
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(10000);
+
+            Map<String, String> loginParams = new HashMap<String, String>();
+            loginParams.put("username", username);
+            loginParams.put("password", password);
+
+            QueryBuilder builder = new QueryBuilder(loginParams);
+            OutputStream os = conn.getOutputStream();
+
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            writer.write(builder.getQuery());
+
+            writer.flush();
+            writer.close();
+
+            ResponseCode = conn.getResponseCode();
+            if (ResponseCode == HttpURLConnection.HTTP_ACCEPTED) {
+                is = conn.getInputStream();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                is.close();
+                return sb.toString();
+            }
+            HasErrors = true;
+            return null;
+
+
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            String result = null;
+            try {
+                result = getResult();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+                CertError = true;
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            if (HasErrors){
+                if (CertError) {
+                    Toast.makeText(getApplicationContext(), "Certificate validation error...", Toast.LENGTH_LONG);
+                    return;
+                }
+                switch (ResponseCode){
+                    case 401:
+                        Toast.makeText(getApplicationContext(), "Invalid Login Credentials", Toast.LENGTH_LONG).show();
+                        break;
+                }
+                return;
+            }
+            try {
+                JSONObject resp = new JSONObject(s);
+                if (resp.getString("message").equals("PROFILE_REGISTERED")){
+                    AlertDialog.Builder bob = new AlertDialog.Builder(getApplicationContext());
+                    bob.setMessage(getResources().getString(R.string.profile_already_registered))
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            }).show();
+                } else if (resp.getString("message").equals("CREATED")){
+                    AuthToken = resp.getString("auth_token");
+                    tempPIN = resp.getString("pin");
+
+                    SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPrefs.edit();
+                    editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
+                    editor.commit();
+
+                    AlertDialog.Builder bob = new AlertDialog.Builder(getApplicationContext());
+                    LayoutInflater inflater = getLayoutInflater();
+                    View v = inflater.inflate(R.layout.pin_dialog, null);
+                    TextView pin_view = (TextView) v.findViewById(R.id.dialog_PIN);
+
+                    pin_view.setText(tempPIN);
+                    bob.setView(v).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //TODO Launch the other activity
+                        }
+                    }).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static boolean CheckForExtStorageReadPerm(Context context){
         int permCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
 
@@ -203,17 +332,9 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 username = usernameET.getText().toString();
                 password = passwordET.getText().toString();
-//                LoginTask t = new LoginTask();
-//                String[] url = {sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none")};
-//                t.execute(url);
-//                String result;
-//                try {
-//                    result = t.get();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                } catch (ExecutionException e) {
-//                    e.printStackTrace();
-//                }
+                LoginTask t = new LoginTask();
+                t.execute();
+
             }
         });
     }

@@ -6,4 +6,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
+    <string name="profile_already_registered">Another device has already registered with the credentials you provided. Please login to the server via a PC and delete the previous profile object.</string>
+    <string name="remember_pin">Your Personal Identification Number is noted down below. Please write it down on a safe spot, you will need it whenever you want to open the lock later.</string>
+    <string name="auth_prefs">com.kerk12.pilock.AUTH</string>
 </resources>
