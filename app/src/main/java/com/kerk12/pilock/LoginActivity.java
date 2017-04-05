@@ -1,6 +1,7 @@
 package com.kerk12.pilock;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +11,6 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -30,6 +30,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,6 +38,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.GeneralSecurityException;
@@ -165,13 +167,18 @@ public class LoginActivity extends AppCompatActivity {
 //        }
 //    }
 
-
+    private void LaunchPINEntryActivity(){
+        Intent i = new Intent(this, PINEntryActivity.class);
+        startActivity(i);
+        finish();
+    }
 
     private class LoginTask extends AsyncTask<Void, Void, String>{
 
         private boolean HasErrors = false;
         private int ResponseCode = 200;
         private boolean CertError = false;
+        private String certErrorDesc = null;
 
         private String getResult() throws GeneralSecurityException, IOException {
             InputStream is = null;
@@ -180,7 +187,17 @@ public class LoginActivity extends AppCompatActivity {
             URL loginURL = new URL(serverURL + "/login");
 
             HttpsURLConnection conn = (HttpsURLConnection) loginURL.openConnection();
-            conn.setSSLSocketFactory(CustomSSLTruster.TrustCertificate().getSocketFactory());
+
+            SSLContext sslContext = null;
+            try {
+                sslContext = CustomSSLTruster.TrustCertificate();
+            } catch (FileNotFoundException e){
+                CertError = true;
+                certErrorDesc = "CERT_NOT_FOUND";
+                throw new FileNotFoundException();
+            }
+
+            conn.setSSLSocketFactory(sslContext.getSocketFactory());
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.setReadTimeout(15000);
@@ -200,7 +217,7 @@ public class LoginActivity extends AppCompatActivity {
             writer.close();
 
             ResponseCode = conn.getResponseCode();
-            if (ResponseCode == HttpURLConnection.HTTP_ACCEPTED) {
+            if (ResponseCode == HttpURLConnection.HTTP_OK) {
                 is = conn.getInputStream();
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
@@ -208,12 +225,20 @@ public class LoginActivity extends AppCompatActivity {
                 StringBuilder sb = new StringBuilder();
                 String line = null;
                 while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                    sb.append(line + "\n");
                 }
                 is.close();
                 return sb.toString();
+            } else if (ResponseCode == HttpURLConnection.HTTP_UNAUTHORIZED){
+                HasErrors = true;
+                ResponseCode = 401;
+            } else if (ResponseCode == HttpURLConnection.HTTP_NOT_FOUND){
+                HasErrors = true;
+                ResponseCode = 404;
+            } else {
+                HasErrors = true;
+                ResponseCode = 4;
             }
-            HasErrors = true;
             return null;
 
 
@@ -224,12 +249,19 @@ public class LoginActivity extends AppCompatActivity {
             String result = null;
             try {
                 result = getResult();
-            } catch (IOException e) {
+            }catch (FileNotFoundException e){
                 e.printStackTrace();
+                CertError = true;
+                HasErrors = true;
+            }  catch (IOException e) {
+                e.printStackTrace();
+                HasErrors = true;
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
                 CertError = true;
+                HasErrors = true;
             }
+
 
             return result;
         }
@@ -239,52 +271,33 @@ public class LoginActivity extends AppCompatActivity {
             super.onPostExecute(s);
             if (HasErrors){
                 if (CertError) {
-                    Toast.makeText(getApplicationContext(), "Certificate validation error...", Toast.LENGTH_LONG);
-                    return;
+                    switch (certErrorDesc){
+                        case "CERT_NOT_FOUND":
+                            Toast.makeText(getApplicationContext(), "Certificate not found...", Toast.LENGTH_LONG).show();
+                            return;
+                        default:
+                            Toast.makeText(getApplicationContext(), "Certificate validation error...", Toast.LENGTH_LONG).show();
+                            return;
+                    }
                 }
                 switch (ResponseCode){
                     case 401:
                         Toast.makeText(getApplicationContext(), "Invalid Login Credentials", Toast.LENGTH_LONG).show();
                         break;
+                    case 404:
+                        Toast.makeText(getApplicationContext(), "Server not found...", Toast.LENGTH_LONG).show();
+                        break;
+                    case 4:
+                        Toast.makeText(getApplicationContext(), "An Unknown error has occured.", Toast.LENGTH_LONG).show();
+                        break;
+                    default:
+                        Toast.makeText(getApplicationContext(), "Could not connect to the server", Toast.LENGTH_LONG).show();
                 }
                 return;
+            } else {
+                AnalyzeJSONResponse(s);
             }
-            try {
-                JSONObject resp = new JSONObject(s);
-                if (resp.getString("message").equals("PROFILE_REGISTERED")){
-                    AlertDialog.Builder bob = new AlertDialog.Builder(getApplicationContext());
-                    bob.setMessage(getResources().getString(R.string.profile_already_registered))
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
 
-                                }
-                            }).show();
-                } else if (resp.getString("message").equals("CREATED")){
-                    AuthToken = resp.getString("auth_token");
-                    tempPIN = resp.getString("pin");
-
-                    SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPrefs.edit();
-                    editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
-                    editor.commit();
-
-                    AlertDialog.Builder bob = new AlertDialog.Builder(getApplicationContext());
-                    LayoutInflater inflater = getLayoutInflater();
-                    View v = inflater.inflate(R.layout.pin_dialog, null);
-                    TextView pin_view = (TextView) v.findViewById(R.id.dialog_PIN);
-
-                    pin_view.setText(tempPIN);
-                    bob.setView(v).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //TODO Launch the other activity
-                        }
-                    }).show();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -301,7 +314,44 @@ public class LoginActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERM);
     }
 
+    private void AnalyzeJSONResponse(String s){
+        try {
+            JSONObject resp = new JSONObject(s);
+            if (resp.getString("message").equals("PROFILE_REGISTERED")){
+                AlertDialog.Builder bob = new AlertDialog.Builder(LoginActivity.this);
+                bob.setMessage(getResources().getString(R.string.profile_already_registered))
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
 
+                            }
+                        }).show();
+            } else if (resp.getString("message").equals("CREATED")){
+                AuthToken = resp.getString("auth_token");
+                tempPIN = resp.getString("pin");
+
+                SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPrefs.edit();
+                editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
+                editor.commit();
+
+                AlertDialog.Builder bob = new AlertDialog.Builder(LoginActivity.this);
+                LayoutInflater inflater = getLayoutInflater();
+                View v = inflater.inflate(R.layout.pin_dialog, null);
+                TextView pin_view = (TextView) v.findViewById(R.id.dialog_PIN);
+
+                pin_view.setText(tempPIN);
+                bob.setView(v).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LaunchPINEntryActivity();
+                    }
+                }).show();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -311,16 +361,27 @@ public class LoginActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
         final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none").equals("none")){
-            Intent i = new Intent(this, SettingsActivity.class);
-            startActivity(i);
-        }
+
         if (!CheckForExtStorageReadPerm(getApplicationContext())){
             reqPerms();
         }
+
+
+        if (sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none").equals("none")){
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
+            finish();
+        }
+
+        SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
+        if (!authPrefs.getString(PINEntryActivity.AUTH_TOKEN_KEY, "").equals("")){
+            LaunchPINEntryActivity();
+        }
+
         usernameET = (EditText) findViewById(R.id.login_username);
         passwordET = (EditText) findViewById(R.id.login_password);
         loginButton = (Button) findViewById(R.id.login_button);
+
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -332,8 +393,11 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 username = usernameET.getText().toString();
                 password = passwordET.getText().toString();
+
                 LoginTask t = new LoginTask();
+
                 t.execute();
+
 
             }
         });
@@ -352,6 +416,7 @@ public class LoginActivity extends AppCompatActivity {
             case R.id.settings_menu_choice:
                 Intent i = new Intent(this, SettingsActivity.class);
                 startActivity(i);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

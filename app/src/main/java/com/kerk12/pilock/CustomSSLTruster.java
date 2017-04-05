@@ -46,11 +46,14 @@ public class CustomSSLTruster {
     public static SSLContext TrustCertificate() throws IOException, GeneralSecurityException {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream caInput = null;
-        try {
-            caInput = new BufferedInputStream(ReadCert());
-        } catch (FileNotFoundException e) {
-            return null;
+
+        FileInputStream certFis = null;
+        certFis = ReadCert();
+        if (certFis == null){
+            throw new FileNotFoundException();
         }
+        caInput = new BufferedInputStream(certFis);
+
         Certificate ca;
         try {
             ca = cf.generateCertificate(caInput);

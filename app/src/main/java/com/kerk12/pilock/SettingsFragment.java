@@ -1,5 +1,6 @@
 package com.kerk12.pilock;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -7,6 +8,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.Toast;
 
@@ -24,7 +26,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         serverAddress.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (Patterns.WEB_URL.matcher(newValue.toString()).matches()){
+                String newValueStr = newValue.toString();
+                if (Patterns.WEB_URL.matcher(newValueStr).matches()){
+                    if (newValueStr.charAt(newValueStr.length() - 1) == '/'){
+                        Toast.makeText(getActivity(), "Please remove the trailing slash at the end (/)", Toast.LENGTH_LONG).show();
+                        return false;
+                    }
                     return true;
                 }
                 Toast.makeText(getActivity(), "The Server URL you have provided is invalid.", Toast.LENGTH_LONG).show();
@@ -40,6 +47,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         super.onPause();
 
         getActivity().finish();
+        Intent i = new Intent(getActivity(), LoginActivity.class);
+        startActivity(i);
     }
 
     @Override
