@@ -327,7 +327,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }).show();
             } else if (resp.getString("message").equals("CREATED")){
-                AuthToken = resp.getString("auth_token");
+                AuthToken = resp.getString(getResources().getString(R.string.auth_token_params));
                 tempPIN = resp.getString("pin");
 
                 SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);

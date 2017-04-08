@@ -9,6 +9,12 @@
     <string name="profile_already_registered">Another device has already registered with the credentials you provided. Please login to the server via a PC and delete the previous profile object.</string>
     <string name="remember_pin">Your Personal Identification Number is noted down below. Please write it down on a safe spot, you will need it whenever you want to open the lock later.</string>
     <string name="auth_prefs">com.kerk12.pilock.AUTH</string>
-    <string name="auth_token_params">auth_token</string>
+    <string name="auth_token_params">authToken</string>
     <string name="pin_params">pin</string>
+    <string name="pin_entry_label">Please enter your pin here. It can only contain 6 numerical digits.</string>
+    <string name="unlock">Unlock</string>
+    <string name="invalid_pin">Invalid PIN</string>
+    <string name="invalid_cert">Invalid Certificate</string>
+    <string name="server_not_found">Server not found</string>
+    <string name="access_granted">Access Granted</string>
 </resources>

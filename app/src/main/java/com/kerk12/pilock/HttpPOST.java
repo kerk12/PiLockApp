@@ -27,10 +27,16 @@ public class HttpPOST {
     private Map<String, String> params = null;
     private String result = null;
     private boolean Executed = false;
-    private int ResponseCode = 200;
+    private int ResponseCode = -1;
     private String ErrorStream = null;
     private boolean HasErrors = false;
     private boolean CertError = false;
+    private POSTError error = null;
+
+    public enum POSTError{
+        INVALID_CERTIFICATE,
+        CONNECTION_ERROR,
+    }
 
     public HttpPOST(URL url, Map<String, String> params) {
         this.url = url;
@@ -53,6 +59,7 @@ public class HttpPOST {
             conn.setSSLSocketFactory(sslContext.getSocketFactory());
 
             // Set the connection parameters...
+            conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setConnectTimeout(10000);
@@ -96,7 +103,6 @@ public class HttpPOST {
                 reader.close();
 
                 ErrorStream = sb.toString();
-                HasErrors = true;
             }
             return null;
 
@@ -111,10 +117,12 @@ public class HttpPOST {
                 e.printStackTrace();
                 HasErrors = true;
                 CertError = true;
+                error = POSTError.CONNECTION_ERROR;
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
                 HasErrors = true;
                 CertError = true;
+                error = POSTError.INVALID_CERTIFICATE;
             }
             return null;
         }
@@ -137,6 +145,24 @@ public class HttpPOST {
         return result;
     }
 
+    public void SendPOST(){
+        if (!Executed){
+            POSTTask t = new POSTTask();
+            try {
+                result = t.execute().get();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                HasErrors = true;
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                HasErrors = true;
+            } finally {
+                Executed = true;
+            }
+        }
+    }
+
     /**
      * Returns the response code recieved from the server after executing the request.
      * @return The response code.
@@ -155,5 +181,9 @@ public class HttpPOST {
 
     public boolean HasCertError() {
         return CertError;
+    }
+
+    public POSTError getError() {
+        return error;
     }
 }
