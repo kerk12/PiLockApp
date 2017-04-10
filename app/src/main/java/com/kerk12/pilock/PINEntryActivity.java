@@ -1,7 +1,6 @@
 package com.kerk12.pilock;
 
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,22 +14,10 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
@@ -54,10 +41,10 @@ public class PINEntryActivity extends AppCompatActivity {
         
     }
 
-    private void PerformAfterPOSTCheck(HttpPOST post){
+    private void PerformAfterPOSTCheck(HttpsPOST post){
         int ResponseCode = post.getResponseCode();
         if (post.HasErrors()){
-            HttpPOST.POSTError error = post.getError();
+            HttpsPOST.POSTError error = post.getError();
             switch (error){
                 case INVALID_CERTIFICATE:
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_cert), Toast.LENGTH_LONG).show();
@@ -135,7 +122,7 @@ public class PINEntryActivity extends AppCompatActivity {
                 params.put(getResources().getString(R.string.auth_token_params), AuthToken);
                 params.put(getResources().getString(R.string.pin_params), PIN);
 
-                HttpPOST post = new HttpPOST(unlockURL, params);
+                HttpsPOST post = new HttpsPOST(unlockURL, params);
                 post.SendPOST();
                 PerformAfterPOSTCheck(post);
 

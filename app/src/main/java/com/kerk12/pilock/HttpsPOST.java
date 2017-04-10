@@ -22,7 +22,7 @@ import javax.net.ssl.SSLContext;
  * Created by kgiannakis on 4/4/2017.
  */
 
-public class HttpPOST {
+public class HttpsPOST {
     private URL url = null;
     private Map<String, String> params = null;
     private String result = null;
@@ -38,7 +38,7 @@ public class HttpPOST {
         CONNECTION_ERROR,
     }
 
-    public HttpPOST(URL url, Map<String, String> params) {
+    public HttpsPOST(URL url, Map<String, String> params) {
         this.url = url;
         this.params = params;
     }
