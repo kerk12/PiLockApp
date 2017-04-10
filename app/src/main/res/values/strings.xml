@@ -17,4 +17,6 @@
     <string name="invalid_cert">Invalid Certificate</string>
     <string name="server_not_found">Server not found</string>
     <string name="access_granted">Access Granted</string>
+    <string name="invalid_pin_entered">The PIN needs to be exactly 6 digits long and can contain only numeric characters.</string>
+    <string name="no_server_url_supplied">Please enter a server URL.</string>
 </resources>

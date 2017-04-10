@@ -26,12 +26,12 @@ public class PINEntryActivity extends AppCompatActivity {
 
     private String AuthToken = null;
     private String ServerURL = null;
-    private String PIN = null;
+    private String PIN = "";
 
     private void AnalyzeResult(String s) {
-        JSONObject response = null;
+
         try {
-            response = new JSONObject(s);
+            JSONObject response = new JSONObject(s);
             if (response.getString("message") == "SUCCESS"){
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.access_granted), Toast.LENGTH_LONG).show();
             }
@@ -69,6 +69,26 @@ public class PINEntryActivity extends AppCompatActivity {
 
     EditText pinET;
     Button unlockButton;
+
+    /**
+     * Validates the given pin. Checks if the pin is of the right size and if it contains non numeric characters.
+     * @param pin The pin.
+     * @return True if the pin is valid, false if it's not.
+     */
+    private boolean ValidatePIN(String pin){
+        //Check the length. It needs to be exactly 6 characters long.
+        if(pin.length() != 6){
+            return false;
+        }
+        //Check for non-numeric characters.
+        char[] pinChars = pin.toCharArray();
+        for (char c : pinChars){
+            if (!Character.isDigit(c)){
+                return false;
+            }
+        }
+        return true;
+    }
 
     public static final String AUTH_TOKEN_KEY = "authToken";
     @Override
@@ -110,6 +130,12 @@ public class PINEntryActivity extends AppCompatActivity {
 
                 unlockButton.setEnabled(false);
                 //TODO Validate the input.
+                if (!ValidatePIN(PIN)) {
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
+                    unlockButton.setEnabled(true);
+                    return;
+                }
+
                 URL unlockURL = null;
                 try {
                     unlockURL = new URL(ServerURL+"/authentication");

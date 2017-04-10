@@ -27,6 +27,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 String newValueStr = newValue.toString();
+
+                if(newValueStr.length() == 0){
+                    Toast.makeText(getActivity(), getResources().getString(R.string.no_server_url_supplied), Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
                 if (Patterns.WEB_URL.matcher(newValueStr).matches()){
                     if (newValueStr.charAt(newValueStr.length() - 1) == '/'){
                         Toast.makeText(getActivity(), "Please remove the trailing slash at the end (/)", Toast.LENGTH_LONG).show();

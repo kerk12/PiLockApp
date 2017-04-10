@@ -18,26 +18,51 @@ import java.util.concurrent.ExecutionException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
-/**
- * Created by kgiannakis on 4/4/2017.
- */
 
+/**
+ * Class used to perform HTTPS POST Requests. Connects to the server, performs the request, recieves the Input or Error Stream, and ends the connection.
+ */
 public class HttpsPOST {
     private URL url = null;
+    /**
+     * The POST request data parameters.
+     */
     private Map<String, String> params = null;
+    /**
+     * The final recieved {@link InputStream}, decoded to a String.
+     */
     private String result = null;
+    /**
+     * Boolean indicating whether the post has been sent or not.
+     */
     private boolean Executed = false;
     private int ResponseCode = -1;
+    /**
+     * The Error Stream decoded into a string. Used if a connection fails.
+     */
     private String ErrorStream = null;
+    /**
+     * Boolean variable indicating whether the connection was completed successfully or not.
+     */
     private boolean HasErrors = false;
     private boolean CertError = false;
     private POSTError error = null;
 
+    /**
+     * Enum used to indicate possible connection errors.
+     * INVALID_CERTIFICATE: Invalid certificate. Connection aborted.
+     * CONNECTION_ERROR: An error occurred while trying to reach the server.
+     */
     public enum POSTError{
         INVALID_CERTIFICATE,
         CONNECTION_ERROR,
     }
 
+    /**
+     * Default constructor. Takes the server page's URL, along with the mapped data.
+     * @param url The Page URL that the POST request will be performed to.
+     * @param params The data parameters, mapped as String key=value pairs. See {@link QueryBuilder} for more.
+     */
     public HttpsPOST(URL url, Map<String, String> params) {
         this.url = url;
         this.params = params;
@@ -68,7 +93,6 @@ public class HttpsPOST {
             // Write the POST data...
             QueryBuilder builder = new QueryBuilder(params);
             OutputStream os = conn.getOutputStream();
-
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
             writer.write(builder.getQuery());
             writer.flush();
@@ -128,23 +152,18 @@ public class HttpsPOST {
         }
     }
 
+    /**
+     * Get the result string from the post request.
+     * @return A string with the recieved data, null on connection error.
+     */
     public String getResult(){
-        if (!Executed){
-            POSTTask t = new POSTTask();
-            try {
-                result = t.execute().get();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                HasErrors = true;
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                HasErrors = true;
-            }
-        }
+        SendPOST();
         return result;
     }
 
+    /**
+     * Sends the POST request.
+     */
     public void SendPOST(){
         if (!Executed){
             POSTTask t = new POSTTask();
