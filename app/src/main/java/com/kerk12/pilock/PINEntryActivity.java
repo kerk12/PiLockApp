@@ -52,12 +52,20 @@ public class PINEntryActivity extends AppCompatActivity {
                 case CONNECTION_ERROR:
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_not_found), Toast.LENGTH_LONG).show();
                     break;
+                case NOT_CONNECTED_TO_WIFI:
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_connected_to_wifi), Toast.LENGTH_LONG).show();
+                    break;
             }
         } else {
             switch (ResponseCode) {
                 case HTTP_OK:
-                    String result = post.getResult();
-                    AnalyzeResult(result);
+                    String result = null;
+                    try {
+                        result = post.getResult();
+                        AnalyzeResult(result);
+                    } catch (HttpsPOST.POSTNotExecutedException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case HTTP_UNAUTHORIZED:
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin), Toast.LENGTH_LONG).show();
@@ -149,7 +157,7 @@ public class PINEntryActivity extends AppCompatActivity {
                 params.put(getResources().getString(R.string.pin_params), PIN);
 
                 HttpsPOST post = new HttpsPOST(unlockURL, params);
-                post.SendPOST();
+                post.SendPOST(getApplicationContext());
                 PerformAfterPOSTCheck(post);
 
             }

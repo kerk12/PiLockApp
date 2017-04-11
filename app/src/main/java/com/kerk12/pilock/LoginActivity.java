@@ -59,6 +59,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.TrustManagerFactory;
 
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
+
 public class LoginActivity extends AppCompatActivity {
 
     private final int STORAGE_PERM = 1;
@@ -173,133 +176,132 @@ public class LoginActivity extends AppCompatActivity {
         finish();
     }
 
-    private class LoginTask extends AsyncTask<Void, Void, String>{
-
-        private boolean HasErrors = false;
-        private int ResponseCode = 200;
-        private boolean CertError = false;
-        private String certErrorDesc = null;
-
-        private String getResult() throws GeneralSecurityException, IOException {
-            InputStream is = null;
-
-            String serverURL = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
-            URL loginURL = new URL(serverURL + "/login");
-
-            HttpsURLConnection conn = (HttpsURLConnection) loginURL.openConnection();
-
-            SSLContext sslContext = null;
-            try {
-                sslContext = CustomSSLTruster.TrustCertificate();
-            } catch (FileNotFoundException e){
-                CertError = true;
-                certErrorDesc = "CERT_NOT_FOUND";
-                throw new FileNotFoundException();
-            }
-
-            conn.setSSLSocketFactory(sslContext.getSocketFactory());
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(10000);
-
-            Map<String, String> loginParams = new HashMap<String, String>();
-            loginParams.put("username", username);
-            loginParams.put("password", password);
-
-            QueryBuilder builder = new QueryBuilder(loginParams);
-            OutputStream os = conn.getOutputStream();
-
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-            writer.write(builder.getQuery());
-
-            writer.flush();
-            writer.close();
-
-            ResponseCode = conn.getResponseCode();
-            if (ResponseCode == HttpURLConnection.HTTP_OK) {
-                is = conn.getInputStream();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
-
-                StringBuilder sb = new StringBuilder();
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                is.close();
-                return sb.toString();
-            } else if (ResponseCode == HttpURLConnection.HTTP_UNAUTHORIZED){
-                HasErrors = true;
-                ResponseCode = 401;
-            } else if (ResponseCode == HttpURLConnection.HTTP_NOT_FOUND){
-                HasErrors = true;
-                ResponseCode = 404;
-            } else {
-                HasErrors = true;
-                ResponseCode = 4;
-            }
-            return null;
-
-
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            String result = null;
-            try {
-                result = getResult();
-            }catch (FileNotFoundException e){
-                e.printStackTrace();
-                CertError = true;
-                HasErrors = true;
-            }  catch (IOException e) {
-                e.printStackTrace();
-                HasErrors = true;
-            } catch (GeneralSecurityException e) {
-                e.printStackTrace();
-                CertError = true;
-                HasErrors = true;
-            }
-
-
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            if (HasErrors){
-                if (CertError) {
-                    switch (certErrorDesc){
-                        case "CERT_NOT_FOUND":
-                            Toast.makeText(getApplicationContext(), "Certificate not found...", Toast.LENGTH_LONG).show();
-                            return;
-                        default:
-                            Toast.makeText(getApplicationContext(), "Certificate validation error...", Toast.LENGTH_LONG).show();
-                            return;
-                    }
-                }
-                switch (ResponseCode){
-                    case 401:
-                        Toast.makeText(getApplicationContext(), "Invalid Login Credentials", Toast.LENGTH_LONG).show();
-                        break;
-                    case 404:
-                        Toast.makeText(getApplicationContext(), "Server not found...", Toast.LENGTH_LONG).show();
-                        break;
-                    case 4:
-                        Toast.makeText(getApplicationContext(), "An Unknown error has occured.", Toast.LENGTH_LONG).show();
-                        break;
-                    default:
-                        Toast.makeText(getApplicationContext(), "Could not connect to the server", Toast.LENGTH_LONG).show();
-                }
-                return;
-            } else {
-                AnalyzeJSONResponse(s);
-            }
-
-        }
-    }
+//    private class LoginTask extends AsyncTask<Void, Void, String>{
+//
+//        private boolean HasErrors = false;
+//        private int ResponseCode = 200;
+//        private boolean CertError = false;
+//        private String certErrorDesc = null;
+//
+//        private String getResult() throws GeneralSecurityException, IOException {
+//            InputStream is = null;
+//
+//            String serverURL = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
+//            URL loginURL = new URL(serverURL + "/login");
+//
+//            HttpsURLConnection conn = (HttpsURLConnection) loginURL.openConnection();
+//
+//            SSLContext sslContext = null;
+//            try {
+//                sslContext = CustomSSLTruster.TrustCertificate();
+//            } catch (FileNotFoundException e){
+//                CertError = true;
+//                certErrorDesc = "CERT_NOT_FOUND";
+//                throw new FileNotFoundException();
+//            }
+//
+//            conn.setSSLSocketFactory(sslContext.getSocketFactory());
+//            conn.setDoInput(true);
+//            conn.setDoOutput(true);
+//            conn.setReadTimeout(15000);
+//            conn.setConnectTimeout(10000);
+//
+//            Map<String, String> loginParams = new HashMap<String, String>();
+//            loginParams.put("username", username);
+//            loginParams.put("password", password);
+//
+//            QueryBuilder builder = new QueryBuilder(loginParams);
+//            OutputStream os = conn.getOutputStream();
+//
+//            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+//            writer.write(builder.getQuery());
+//
+//            writer.flush();
+//            writer.close();
+//
+//            ResponseCode = conn.getResponseCode();
+//            if (ResponseCode == HttpURLConnection.HTTP_OK) {
+//                is = conn.getInputStream();
+//
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"), 8);
+//
+//                StringBuilder sb = new StringBuilder();
+//                String line = null;
+//                while ((line = reader.readLine()) != null) {
+//                    sb.append(line + "\n");
+//                }
+//                is.close();
+//                return sb.toString();
+//            } else if (ResponseCode == HttpURLConnection.HTTP_UNAUTHORIZED){
+//                HasErrors = true;
+//                ResponseCode = 401;
+//            } else if (ResponseCode == HttpURLConnection.HTTP_NOT_FOUND){
+//                HasErrors = true;
+//                ResponseCode = 404;
+//            } else {
+//                HasErrors = true;
+//                ResponseCode = 4;
+//            }
+//            return null;
+//
+//
+//        }
+//
+//        @Override
+//        protected String doInBackground(Void... params) {
+//            String result = null;
+//            try {
+//                result = getResult();
+//            }catch (FileNotFoundException e){
+//                e.printStackTrace();
+//                CertError = true;
+//                HasErrors = true;
+//            }  catch (IOException e) {
+//                e.printStackTrace();
+//                HasErrors = true;
+//            } catch (GeneralSecurityException e) {
+//                e.printStackTrace();
+//                CertError = true;
+//                HasErrors = true;
+//            }
+//
+//
+//            return result;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String s) {
+//            super.onPostExecute(s);
+//            if (HasErrors){
+//                if (CertError) {
+//                    switch (certErrorDesc){
+//                        case "CERT_NOT_FOUND":
+//                            Toast.makeText(getApplicationContext(), "Certificate not found...", Toast.LENGTH_LONG).show();
+//                            return;
+//                        default:
+//                            Toast.makeText(getApplicationContext(), "Certificate validation error...", Toast.LENGTH_LONG).show();
+//                            return;
+//                    }
+//                }
+//                switch (ResponseCode){
+//                    case 401:
+//                        Toast.makeText(getApplicationContext(), "Invalid Login Credentials", Toast.LENGTH_LONG).show();
+//                        break;
+//                    case 404:
+//                        Toast.makeText(getApplicationContext(), "Server not found...", Toast.LENGTH_LONG).show();
+//                        break;
+//                    case 4:
+//                        Toast.makeText(getApplicationContext(), "An Unknown error has occured.", Toast.LENGTH_LONG).show();
+//                        break;
+//                    default:
+//                        Toast.makeText(getApplicationContext(), "Could not connect to the server", Toast.LENGTH_LONG).show();
+//                }
+//                return;
+//            } else {
+//                AnalyzeJSONResponse(s);
+//            }
+//
+//
 
     public static boolean CheckForExtStorageReadPerm(Context context){
         int permCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -308,6 +310,43 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+
+    private void PerformAfterPOSTCheck(HttpsPOST post){
+        int ResponseCode = post.getResponseCode();
+        if (post.HasErrors()){
+            HttpsPOST.POSTError error = post.getError();
+            switch (error){
+                case INVALID_CERTIFICATE:
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_cert), Toast.LENGTH_LONG).show();
+                    break;
+                case CONNECTION_ERROR:
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_not_found), Toast.LENGTH_LONG).show();
+                    break;
+                case NOT_CONNECTED_TO_WIFI:
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_connected_to_wifi), Toast.LENGTH_LONG).show();
+                    break;
+            }
+        } else {
+            switch (ResponseCode) {
+                case HTTP_OK:
+                    String result = null;
+                    try {
+                        result = post.getResult();
+                        AnalyzeJSONResponse(result);
+                    } catch (HttpsPOST.POSTNotExecutedException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case HTTP_UNAUTHORIZED:
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_login), Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+
+
+
     }
 
     private void reqPerms(){
@@ -387,6 +426,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                loginButton.setEnabled(false);
                 if (!CheckForExtStorageReadPerm(getApplicationContext())) {
                     reqPerms();
                     return;
@@ -394,13 +434,38 @@ public class LoginActivity extends AppCompatActivity {
                 username = usernameET.getText().toString();
                 password = passwordET.getText().toString();
 
-                LoginTask t = new LoginTask();
+                if (!ValidateCredentials(username, password)){
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.please_enter_username_and_password), Toast.LENGTH_LONG).show();
+                    loginButton.setEnabled(true);
+                    return;
+                }
 
-                t.execute();
+
+                try {
+
+                    String serverURL = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
+                    URL LoginURL = new URL(serverURL+"/login");
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put(getResources().getString(R.string.username_params), username);
+                    params.put(getResources().getString(R.string.password_params), password);
+                    HttpsPOST post = new HttpsPOST(LoginURL, params);
+                    post.SendPOST(getApplicationContext());
+                    PerformAfterPOSTCheck(post);
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } finally {
+                    loginButton.setEnabled(true);
+                }
+
 
 
             }
         });
+    }
+
+    private boolean ValidateCredentials(String username, String password) {
+        return !(username.length() == 0 || password.length() == 0);
     }
 
     @Override

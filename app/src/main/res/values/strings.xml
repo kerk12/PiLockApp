@@ -5,6 +5,8 @@
     <string name="login_label">Please login to the server:</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="username_params">username</string>
+    <string name="password_params">password</string>
     <string name="login">Login</string>
     <string name="profile_already_registered">Another device has already registered with the credentials you provided. Please login to the server via a PC and delete the previous profile object.</string>
     <string name="remember_pin">Your Personal Identification Number is noted down below. Please write it down on a safe spot, you will need it whenever you want to open the lock later.</string>
@@ -19,4 +21,7 @@
     <string name="access_granted">Access Granted</string>
     <string name="invalid_pin_entered">The PIN needs to be exactly 6 digits long and can contain only numeric characters.</string>
     <string name="no_server_url_supplied">Please enter a server URL.</string>
+    <string name="please_enter_username_and_password">Please enter a username and a password.</string>
+    <string name="not_connected_to_wifi">You need to be connected via WiFi to proceed.</string>
+    <string name="invalid_login">Invalid Login Credentials</string>
 </resources>

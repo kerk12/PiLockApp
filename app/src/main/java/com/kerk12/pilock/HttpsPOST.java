@@ -1,5 +1,8 @@
 package com.kerk12.pilock;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 import java.io.BufferedReader;
@@ -23,6 +26,24 @@ import javax.net.ssl.SSLContext;
  * Class used to perform HTTPS POST Requests. Connects to the server, performs the request, recieves the Input or Error Stream, and ends the connection.
  */
 public class HttpsPOST {
+
+    public class POSTNotExecutedException extends Exception{
+        public POSTNotExecutedException(){
+            super("The POST Request hasn't been Executed yet. Call SendPOST(Context context) first.");
+        }
+    }
+
+    public static boolean IsConnectedToWiFi(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        if (info != null || info.isConnected()){
+            if (info.getType() == ConnectivityManager.TYPE_WIFI){
+                return true;
+            }
+        }
+        return false;
+    }
+
     private URL url = null;
     /**
      * The POST request data parameters.
@@ -56,6 +77,7 @@ public class HttpsPOST {
     public enum POSTError{
         INVALID_CERTIFICATE,
         CONNECTION_ERROR,
+        NOT_CONNECTED_TO_WIFI,
     }
 
     /**
@@ -140,7 +162,6 @@ public class HttpsPOST {
             } catch (IOException e) {
                 e.printStackTrace();
                 HasErrors = true;
-                CertError = true;
                 error = POSTError.CONNECTION_ERROR;
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
@@ -156,29 +177,39 @@ public class HttpsPOST {
      * Get the result string from the post request.
      * @return A string with the recieved data, null on connection error.
      */
-    public String getResult(){
-        SendPOST();
+    public String getResult() throws POSTNotExecutedException {
+        if (!Executed){
+            throw new POSTNotExecutedException();
+        }
         return result;
     }
 
     /**
      * Sends the POST request.
      */
-    public void SendPOST(){
+    public void SendPOST(Context context){
         if (!Executed){
-            POSTTask t = new POSTTask();
-            try {
-                result = t.execute().get();
+            if (IsConnectedToWiFi(context)){
+                POSTTask t = new POSTTask();
+                try {
+                    result = t.execute().get();
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    HasErrors = true;
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                    HasErrors = true;
+                } finally {
+                    Executed = true;
+                }
+            } else {
                 HasErrors = true;
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                HasErrors = true;
-            } finally {
+                error = POSTError.NOT_CONNECTED_TO_WIFI;
                 Executed = true;
             }
+
+
         }
     }
 
