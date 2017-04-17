@@ -342,6 +342,8 @@ public class LoginActivity extends AppCompatActivity {
                 case HTTP_UNAUTHORIZED:
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_login), Toast.LENGTH_LONG).show();
                     break;
+                default:
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_not_found), Toast.LENGTH_LONG).show();
             }
         }
 
