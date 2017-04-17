@@ -32,7 +32,7 @@ public class PINEntryActivity extends AppCompatActivity {
 
         try {
             JSONObject response = new JSONObject(s);
-            if (response.getString("message") == "SUCCESS"){
+            if (response.getString("message").equals("SUCCESS")){
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.access_granted), Toast.LENGTH_LONG).show();
             }
         } catch (JSONException e) {

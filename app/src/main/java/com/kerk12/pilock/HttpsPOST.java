@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,8 +19,11 @@ import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLSession;
 
 
 /**
@@ -36,7 +40,7 @@ public class HttpsPOST {
     public static boolean IsConnectedToWiFi(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info != null || info.isConnected()){
+        if (info != null && info.isConnected()){
             if (info.getType() == ConnectivityManager.TYPE_WIFI){
                 return true;
             }
@@ -104,6 +108,15 @@ public class HttpsPOST {
             SSLContext sslContext = CustomSSLTruster.TrustCertificate();
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setSSLSocketFactory(sslContext.getSocketFactory());
+            // Set the hostname verifier to verify all hostnames.
+            // If the hostname is an IP it doesn't get verified by default, unless this is inserted...
+            conn.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    Log.d("SSL Hostname", hostname+ ": Accepted Connection");
+                    return true;
+                }
+            });
 
             // Set the connection parameters...
             conn.setRequestMethod("POST");
@@ -159,6 +172,9 @@ public class HttpsPOST {
         protected String doInBackground(Void... params) {
             try {
                 return getResult();
+            } catch (SSLHandshakeException e){
+                HasErrors = true;
+                error = POSTError.INVALID_CERTIFICATE;
             } catch (IOException e) {
                 e.printStackTrace();
                 HasErrors = true;
