@@ -1,11 +1,15 @@
 package com.kerk12.pilock;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -83,7 +87,7 @@ public class PINEntryActivity extends AppCompatActivity {
      * @param pin The pin.
      * @return True if the pin is valid, false if it's not.
      */
-    private boolean ValidatePIN(String pin){
+    public static boolean ValidatePIN(String pin){
         //Check the length. It needs to be exactly 6 characters long.
         if(pin.length() != 6){
             return false;
@@ -163,5 +167,23 @@ public class PINEntryActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.pin_entry_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.change_pin_menu_choice:
+                Intent i = new Intent(this, ChangePinActivity.class);
+                startActivity(i);
+                return true;
+        }
+        return false;
     }
 }

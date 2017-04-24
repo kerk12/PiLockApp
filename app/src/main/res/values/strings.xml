@@ -24,4 +24,7 @@
     <string name="please_enter_username_and_password">Please enter a username and a password.</string>
     <string name="not_connected_to_wifi">You need to be connected via WiFi to proceed.</string>
     <string name="invalid_login">Invalid Login Credentials</string>
+    <string name="change_pin_label">Please insert your old PIN and your new PIN:</string>
+    <string name="pin_change_successful">PIN Changed Successfully</string>
+    <string name="change_pin">Change PIN</string>
 </resources>
