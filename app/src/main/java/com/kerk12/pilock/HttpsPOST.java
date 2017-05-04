@@ -25,6 +25,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
+import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
+
 
 /**
  * Class used to perform HTTPS POST Requests. Connects to the server, performs the request, recieves the Input or Error Stream, and ends the connection.
@@ -71,18 +73,18 @@ public class HttpsPOST {
      */
     private boolean HasErrors = false;
     private boolean CertError = false;
-    private POSTError error = null;
+    private HttpsConnectionError error = null;
 
-    /**
-     * Enum used to indicate possible connection errors.
-     * INVALID_CERTIFICATE: Invalid certificate. Connection aborted.
-     * CONNECTION_ERROR: An error occurred while trying to reach the server.
-     */
-    public enum POSTError{
-        INVALID_CERTIFICATE,
-        CONNECTION_ERROR,
-        NOT_CONNECTED_TO_WIFI,
-    }
+//    /**
+//     * Enum used to indicate possible connection errors.
+//     * INVALID_CERTIFICATE: Invalid certificate. Connection aborted.
+//     * CONNECTION_ERROR: An error occurred while trying to reach the server.
+//     */
+//    public enum HttpsConnectionError{
+//        INVALID_CERTIFICATE,
+//        CONNECTION_ERROR,
+//        NOT_CONNECTED_TO_WIFI,
+//    }
 
     /**
      * Default constructor. Takes the server page's URL, along with the mapped data.
@@ -174,16 +176,16 @@ public class HttpsPOST {
                 return getResult();
             } catch (SSLHandshakeException e){
                 HasErrors = true;
-                error = POSTError.INVALID_CERTIFICATE;
+                error = HttpsConnectionError.INVALID_CERTIFICATE;
             } catch (IOException e) {
                 e.printStackTrace();
                 HasErrors = true;
-                error = POSTError.CONNECTION_ERROR;
+                error = HttpsConnectionError.CONNECTION_ERROR;
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
                 HasErrors = true;
                 CertError = true;
-                error = POSTError.INVALID_CERTIFICATE;
+                error = HttpsConnectionError.INVALID_CERTIFICATE;
             }
             return null;
         }
@@ -221,7 +223,7 @@ public class HttpsPOST {
                 }
             } else {
                 HasErrors = true;
-                error = POSTError.NOT_CONNECTED_TO_WIFI;
+                error = HttpsConnectionError.CONNECTION_ERROR;
                 Executed = true;
             }
 
@@ -249,7 +251,7 @@ public class HttpsPOST {
         return CertError;
     }
 
-    public POSTError getError() {
+    public HttpsConnectionError getError() {
         return error;
     }
 }

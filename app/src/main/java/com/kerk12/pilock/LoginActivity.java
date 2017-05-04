@@ -95,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
     private void PerformAfterPOSTCheck(HttpsPOST post){
         int ResponseCode = post.getResponseCode();
         if (post.HasErrors()){
-            HttpsPOST.POSTError error = post.getError();
+            HttpsConnectionError error = post.getError();
             switch (error){
                 case INVALID_CERTIFICATE:
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_cert), Toast.LENGTH_LONG).show();
