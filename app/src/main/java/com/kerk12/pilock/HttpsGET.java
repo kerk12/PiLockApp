@@ -10,48 +10,38 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
+import static com.kerk12.pilock.HttpsConnectionError.CONNECTION_ERROR;
+import static com.kerk12.pilock.HttpsConnectionError.INVALID_CERTIFICATE;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 /**
  * Created by kgiannakis on 4/5/2017.
  */
 
-public class HttpsGET {
-    private URL url;
-    private Map<String, String> params = null;
-
-
+public class HttpsGET extends HttpsConnection{
 
     public HttpsGET(URL url, Map<String, String> params){
-        this.url = url;
-        this.params = params;
+        super(url, params);
     }
 
     public HttpsGET(URL url){
-        this.url = url;
+        super(url);
     }
-
-    private InputStream response_stream;
-    private String response = null;
-    private InputStream errorStream;
-    private int ResponseCode = 200;
-
-    private Boolean HasErrors;
-    private HttpsConnectionError error = null;
 
     private class GETTask extends AsyncTask<Void, Void, String>{
 
         private String getResponse() throws IOException, GeneralSecurityException {
-            URL urlNew = url;
-            if (params != null){
-                String url_temp = url.toString();
-                QueryBuilder builder = new QueryBuilder(params);
+            URL urlNew = getUrl();
+            if (getParams() != null){
+                String url_temp = getUrl().toString();
+                QueryBuilder builder = new QueryBuilder(getParams());
                 url_temp = url_temp + "?" + builder.getQuery();
 
             }
@@ -60,7 +50,7 @@ public class HttpsGET {
             conn.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
-                    Log.d("PiLock_HB","Allowed host "+hostname);
+                    Log.d("HttpsGET","Allowed host "+hostname);
                     return true;
                 }
             });
@@ -71,8 +61,8 @@ public class HttpsGET {
 
             ResponseCode = conn.getResponseCode();
             if (ResponseCode == HTTP_OK){
-                response_stream = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(response_stream, "UTF-8"));
+                ResponseStream = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ResponseStream, "UTF-8"));
                 StringBuilder builder = new StringBuilder();
                 String line = null;
                 while ((line = reader.readLine()) != null){
@@ -81,8 +71,8 @@ public class HttpsGET {
                 reader.close();
                 return builder.toString();
             } else {
-                errorStream = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(response_stream, "UTF-8"));
+                ErrorStream = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ErrorStream, "UTF-8"));
                 StringBuilder builder = new StringBuilder();
                 String line = null;
                 while ((line = reader.readLine()) != null){
@@ -96,20 +86,34 @@ public class HttpsGET {
         @Override
         protected String doInBackground(Void... params) {
             try {
-                response = getResponse();
+                String resp = getResponse();
+                return resp;
             } catch (SSLHandshakeException e){
-                HasErrors = true;
-                error = HttpsConnectionError.INVALID_CERTIFICATE;
+                setHasError(true);
+                setError(INVALID_CERTIFICATE);
             } catch (IOException e) {
                 e.printStackTrace();
-                HasErrors = true;
-                error = HttpsConnectionError.CONNECTION_ERROR;
+                setHasError(true);
+                setError(CONNECTION_ERROR);
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
-                HasErrors = true;
-                error = HttpsConnectionError.INVALID_CERTIFICATE;
+                setHasError(true);
+                setError(INVALID_CERTIFICATE);
             }
-            return response;
+            return null;
+        }
+
+
+    }
+
+    public void SendGET(){
+        GETTask get = new GETTask();
+        try {
+            super.setResponse(get.execute().get());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
     }
 }
