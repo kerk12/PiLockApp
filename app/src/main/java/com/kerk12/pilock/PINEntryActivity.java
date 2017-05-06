@@ -147,6 +147,10 @@ public class PINEntryActivity extends AppCompatActivity {
                     unlockButton.setEnabled(true);
                     return;
                 }
+                if (!Heartbeat.isAlive(getApplicationContext())){
+                    unlockButton.setEnabled(true);
+                    return;
+                }
 
                 URL unlockURL = null;
                 try {

@@ -27,4 +27,6 @@
     <string name="change_pin_label">Please insert your old PIN and your new PIN:</string>
     <string name="pin_change_successful">PIN Changed Successfully</string>
     <string name="change_pin">Change PIN</string>
+    <string name="locked">Locked...</string>
+    <string name="internal_server_error">An internal server error has occured...</string>
 </resources>

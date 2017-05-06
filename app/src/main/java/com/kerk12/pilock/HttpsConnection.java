@@ -1,5 +1,9 @@
 package com.kerk12.pilock;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
@@ -43,6 +47,17 @@ public class HttpsConnection {
         this.sslSocketFactory = sslSocketFactory;
     }
 
+    public static boolean IsConnectedToWiFi(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        if (info != null && info.isConnected()){
+            if (info.getType() == ConnectivityManager.TYPE_WIFI){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public HttpsConnectionError getError() {
         return error;
     }
@@ -72,6 +87,7 @@ public class HttpsConnection {
     }
 
     public void setError(HttpsConnectionError error) {
+        HasError = true;
         this.error = error;
     }
 

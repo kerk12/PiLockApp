@@ -210,6 +210,11 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setEnabled(false);
                 if (!CheckForExtStorageReadPerm(getApplicationContext())) {
                     reqPerms();
+                    loginButton.setEnabled(true);
+                    return;
+                }
+                if (!Heartbeat.isAlive(getApplicationContext())){
+                    loginButton.setEnabled(true);
                     return;
                 }
                 username = usernameET.getText().toString();

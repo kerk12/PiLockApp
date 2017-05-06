@@ -1,5 +1,6 @@
 package com.kerk12.pilock;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,6 +20,7 @@ import javax.net.ssl.SSLSession;
 
 import static com.kerk12.pilock.HttpsConnectionError.CONNECTION_ERROR;
 import static com.kerk12.pilock.HttpsConnectionError.INVALID_CERTIFICATE;
+import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 /**
@@ -43,7 +45,7 @@ public class HttpsGET extends HttpsConnection{
                 String url_temp = getUrl().toString();
                 QueryBuilder builder = new QueryBuilder(getParams());
                 url_temp = url_temp + "?" + builder.getQuery();
-
+                urlNew = new URL(url_temp);
             }
             HttpsURLConnection conn = (HttpsURLConnection) urlNew.openConnection();
             conn.setSSLSocketFactory(CustomSSLTruster.TrustCertificate().getSocketFactory());
@@ -89,15 +91,12 @@ public class HttpsGET extends HttpsConnection{
                 String resp = getResponse();
                 return resp;
             } catch (SSLHandshakeException e){
-                setHasError(true);
                 setError(INVALID_CERTIFICATE);
             } catch (IOException e) {
                 e.printStackTrace();
-                setHasError(true);
                 setError(CONNECTION_ERROR);
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
-                setHasError(true);
                 setError(INVALID_CERTIFICATE);
             }
             return null;
@@ -106,14 +105,18 @@ public class HttpsGET extends HttpsConnection{
 
     }
 
-    public void SendGET(){
-        GETTask get = new GETTask();
-        try {
-            super.setResponse(get.execute().get());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+    public void SendGET(Context context){
+        if (IsConnectedToWiFi(context)) {
+            GETTask get = new GETTask();
+            try {
+                super.setResponse(get.execute().get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        } else {
+            setError(NOT_CONNECTED_TO_WIFI);
         }
     }
 }

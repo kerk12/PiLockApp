@@ -107,11 +107,16 @@ public class ChangePinActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                submitButton.setEnabled(false);
                 if (!(PINEntryActivity.ValidatePIN(newPin) && PINEntryActivity.ValidatePIN(oldPin)) ){
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
+                    submitButton.setEnabled(true);
                     return;
                 }
-
+                if (!Heartbeat.isAlive(getApplicationContext())){
+                    submitButton.setEnabled(true);
+                    return;
+                }
 
                 try {
                     URL changePinURL = new URL(ChangePinURL);
