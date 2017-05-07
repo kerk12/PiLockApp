@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -106,6 +107,8 @@ public class PINEntryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Set the SECURE flag, to prevent screenshots and background snapshots.
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_pinentry);
 
         /*
@@ -116,6 +119,7 @@ public class PINEntryActivity extends AppCompatActivity {
         ServerURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
         AuthToken = authPrefs.getString(AUTH_TOKEN_KEY, "None");
 
+        // Set up the layout.
         pinET = (EditText) findViewById(R.id.pin);
         pinET.addTextChangedListener(new TextWatcher() {
             @Override
@@ -167,7 +171,7 @@ public class PINEntryActivity extends AppCompatActivity {
                 HttpsPOST post = new HttpsPOST(unlockURL, params);
                 post.SendPOST(getApplicationContext());
                 PerformAfterPOSTCheck(post);
-
+                pinET.setText("");
             }
         });
 

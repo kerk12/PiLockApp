@@ -38,23 +38,16 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                         Toast.makeText(getActivity(), "Please remove the trailing slash at the end (/)", Toast.LENGTH_LONG).show();
                         return false;
                     }
+                    if (newValueStr.startsWith("http:")){
+                        Toast.makeText(getActivity(), getResources().getString(R.string.http_not_supported), Toast.LENGTH_LONG).show();
+                        return false;
+                    }
                     return true;
                 }
                 Toast.makeText(getActivity(), "The Server URL you have provided is invalid.", Toast.LENGTH_LONG).show();
                 return false;
             }
         });
-    }
-
-
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        getActivity().finish();
-        Intent i = new Intent(getActivity(), LoginActivity.class);
-        startActivity(i);
     }
 
     @Override

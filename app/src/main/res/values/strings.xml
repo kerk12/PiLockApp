@@ -28,5 +28,8 @@
     <string name="pin_change_successful">PIN Changed Successfully</string>
     <string name="change_pin">Change PIN</string>
     <string name="locked">Locked...</string>
-    <string name="internal_server_error">An internal server error has occured...</string>
+    <string name="internal_server_error">An internal server error has occurred...</string>
+    <string name="no_server_url_detected">No server URL has been entered. Exiting...</string>
+    <string name="http_not_supported">Plain HTTP is not supported. Please use HTTP over SSL (HTTPS).</string>
+    <string name="settings_server_address_summary">The URL of the PiLock Server.</string>
 </resources>

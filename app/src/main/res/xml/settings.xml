@@ -7,6 +7,7 @@
             android:key="server_address"
             android:selectAllOnFocus="true"
             android:singleLine="true"
+            android:summary="@string/settings_server_address_summary"
             android:title="@string/server_address" />
     </PreferenceCategory>
 

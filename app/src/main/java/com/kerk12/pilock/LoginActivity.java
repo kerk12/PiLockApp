@@ -182,15 +182,14 @@ public class LoginActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
         final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if (!CheckForExtStorageReadPerm(getApplicationContext())){
-            reqPerms();
-        }
-
-
         if (sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none").equals("none")){
             Intent i = new Intent(this, SettingsActivity.class);
             startActivity(i);
             finish();
+        }
+
+        if (!CheckForExtStorageReadPerm(getApplicationContext())){
+            reqPerms();
         }
 
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
