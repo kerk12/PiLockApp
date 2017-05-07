@@ -33,6 +33,7 @@ public class Heartbeat {
 
             //Perform a GET request to the root page.
             HttpsGET get = new HttpsGET(url);
+            get.setSslSocketFactory(CustomSSLTruster.TrustCertificate().getSocketFactory());
             get.SendGET(context);
 
             //Check for errors
@@ -58,6 +59,7 @@ public class Heartbeat {
                         String response = get.getResponse();
                         JSONObject resp = new JSONObject(response);
                         String status = resp.getString("status");
+                        //TODO Check the version number.
                         if (!status.equals("ALIVE")){
                             //The server is locked.
                             Toast.makeText(context, context.getResources().getString(R.string.locked), Toast.LENGTH_LONG).show();

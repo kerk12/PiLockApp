@@ -23,38 +23,54 @@ import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 /**
- * Created by kgiannakis on 4/5/2017.
+ * Class used for performing GET requests.
  */
-
 public class HttpsGET extends HttpsRequest {
 
+    /**
+     * Constructor used for passing in parameters to the GET request.
+     */
     public HttpsGET(URL url, Map<String, String> params){
         super(url, params);
     }
 
+    /**
+     * Default constructor. Requires the server's URL.
+     * @param url The URL the request will be sent to.
+     */
     public HttpsGET(URL url){
         super(url);
     }
 
+
+    /**
+     * AsyncTask responsible for sending the GET request.
+     */
     private class GETTask extends AsyncTask<Void, Void, String>{
 
         private String getResponse() throws IOException, GeneralSecurityException {
             URL urlNew = getUrl();
+            //If parameters are passed, add them to the end of the URL.
             if (getParams() != null){
                 String url_temp = getUrl().toString();
                 QueryBuilder builder = new QueryBuilder(getParams());
                 url_temp = url_temp + "?" + builder.getQuery();
                 urlNew = new URL(url_temp);
             }
+
             HttpsURLConnection conn = (HttpsURLConnection) urlNew.openConnection();
-            conn.setSSLSocketFactory(CustomSSLTruster.TrustCertificate().getSocketFactory());
-            conn.setHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    Log.d("HttpsGET","Allowed host "+hostname);
-                    return true;
-                }
-            });
+            // If a custom SSL socket factory, is set, add it to the connection.
+            if (getSslSocketFactory() != null) {
+                conn.setSSLSocketFactory(getSslSocketFactory());
+                conn.setHostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        Log.d("HttpsGET", "Allowed host " + hostname);
+                        return true;
+                    }
+                });
+            }
+            //Define connection parameters.
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
             conn.setConnectTimeout(5000);
@@ -104,7 +120,13 @@ public class HttpsGET extends HttpsRequest {
 
     }
 
+    /**
+     * Sends the GET request.
+     * @param context The app's context.
+     */
     public void SendGET(Context context){
+        //Check if the phone is connected to WiFi
+        //TODO Make it customizable.
         if (IsConnectedToWiFi(context)) {
             GETTask get = new GETTask();
             try {

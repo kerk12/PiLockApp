@@ -35,6 +35,7 @@ public class PINEntryActivity extends AppCompatActivity {
 
     private void AnalyzeResult(String s) {
 
+
         try {
             JSONObject response = new JSONObject(s);
             if (response.getString("message").equals("SUCCESS")){
