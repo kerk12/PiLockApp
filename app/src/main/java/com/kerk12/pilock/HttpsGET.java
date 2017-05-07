@@ -6,7 +6,6 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -27,7 +26,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
  * Created by kgiannakis on 4/5/2017.
  */
 
-public class HttpsGET extends HttpsConnection{
+public class HttpsGET extends HttpsRequest {
 
     public HttpsGET(URL url, Map<String, String> params){
         super(url, params);
