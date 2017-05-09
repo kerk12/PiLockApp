@@ -5,16 +5,26 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 /**
- * Created by kgiannakis on 3/4/2017.
+ * Class responsible for building Request parameters. Takes a map of the parameters, and outputs them in a URL/request friendly form.
  */
-
 public class QueryBuilder {
     private Map<String, String> queryMap;
 
+    /**
+     * Default constructor. Takes in a map of key=value parameters.
+     * @param queryMap The Request Parameters.
+     */
     public QueryBuilder(Map<String, String> queryMap) {
         this.queryMap = queryMap;
     }
 
+    /**
+     * Return a HTTP request friendly parameter string.
+     * For example, "mode: gaming, graphics: high" would result in:
+     * mode=gaming&graphics=high
+     * @return The parameter string.
+     * @throws UnsupportedEncodingException
+     */
     public String getQuery() throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
 

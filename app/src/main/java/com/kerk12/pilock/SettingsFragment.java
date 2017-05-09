@@ -27,17 +27,19 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 String newValueStr = newValue.toString();
-
+                // Check if the string entered is empty.
                 if(newValueStr.length() == 0){
                     Toast.makeText(getActivity(), getResources().getString(R.string.no_server_url_supplied), Toast.LENGTH_LONG).show();
                     return false;
                 }
-
+                //Check if the string is a URL.
                 if (Patterns.WEB_URL.matcher(newValueStr).matches()){
+                    //Check if there is a trailing backslash at the end.
                     if (newValueStr.charAt(newValueStr.length() - 1) == '/'){
                         Toast.makeText(getActivity(), "Please remove the trailing slash at the end (/)", Toast.LENGTH_LONG).show();
                         return false;
                     }
+                    //Check if Plain HTTP is used.
                     if (newValueStr.startsWith("http:")){
                         Toast.makeText(getActivity(), getResources().getString(R.string.http_not_supported), Toast.LENGTH_LONG).show();
                         return false;

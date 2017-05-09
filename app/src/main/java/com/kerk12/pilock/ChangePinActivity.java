@@ -20,9 +20,19 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class ChangePinActivity extends AppCompatActivity {
 
+    /*
+        Layout views:
+     */
     EditText oldPinET, newPinET;
     Button submitButton;
 
+    /*
+        Parameters:
+        Old Pin
+        New Pin
+        Pin Change URL
+        Auth Token
+     */
     String oldPin, newPin = "";
     String ChangePinURL = null;
     String AuthToken = null;
@@ -62,12 +72,14 @@ public class ChangePinActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_pin);
 
+        //Get the server URL, along with the AuthToken
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
 
         ChangePinURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "")+"/changepin";
         AuthToken = authPrefs.getString(getResources().getString(R.string.auth_token_params), "");
 
+        //Wire them to the layout...
         oldPinET = (EditText) findViewById(R.id.CP_old_pin);
         oldPinET.addTextChangedListener(new TextWatcher() {
             @Override
@@ -107,12 +119,15 @@ public class ChangePinActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Disable the button temporarily
                 submitButton.setEnabled(false);
+
                 if (!(PINEntryActivity.ValidatePIN(newPin) && PINEntryActivity.ValidatePIN(oldPin)) ){
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
                     submitButton.setEnabled(true);
                     return;
                 }
+
                 if (!Heartbeat.isAlive(getApplicationContext())){
                     submitButton.setEnabled(true);
                     return;
@@ -136,8 +151,10 @@ public class ChangePinActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     public void onBackPressed() {
+        //End the activity when the back button is pressed.
         super.onBackPressed();
         finish();
     }

@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -66,6 +67,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private final int STORAGE_PERM = 1;
 
+
     String username = null;
     String password = null;
 
@@ -75,6 +77,9 @@ public class LoginActivity extends AppCompatActivity {
     EditText usernameET, passwordET;
     Button loginButton;
 
+    /**
+     * Launches {@link PINEntryActivity}
+     */
     private void LaunchPINEntryActivity(){
         Intent i = new Intent(this, PINEntryActivity.class);
         startActivity(i);
@@ -82,6 +87,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Check for the READ_EXTERNAL_STORAGE permission.
+     * @param context The context of the application.
+     * @return True if the permission is granted, false if not.
+     */
     public static boolean CheckForExtStorageReadPerm(Context context){
         int permCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
 
@@ -130,6 +140,9 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Request the READ_EXTERNAL_STORAGE permission.
+     */
     private void reqPerms(){
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERM);
     }
@@ -137,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
     private void AnalyzeJSONResponse(String s){
         try {
             JSONObject resp = new JSONObject(s);
+            //If another device has registered a profile.
             if (resp.getString("message").equals("PROFILE_REGISTERED")){
                 AlertDialog.Builder bob = new AlertDialog.Builder(LoginActivity.this);
                 bob.setMessage(getResources().getString(R.string.profile_already_registered))
@@ -147,14 +161,17 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }).show();
             } else if (resp.getString("message").equals("CREATED")){
+                //If the profile was created successfully, get the returned AuthToken and the PIN
                 AuthToken = resp.getString(getResources().getString(R.string.auth_token_params));
                 tempPIN = resp.getString("pin");
 
+                //Store the AuthToken...
                 SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
                 editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
                 editor.commit();
 
+                //Show the PIN to the user.
                 AlertDialog.Builder bob = new AlertDialog.Builder(LoginActivity.this);
                 LayoutInflater inflater = getLayoutInflater();
                 View v = inflater.inflate(R.layout.pin_dialog, null);
@@ -176,22 +193,25 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_login);
 
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
         final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
+        //If the Server URL is "none", then the URL hasn't been set. Launch {@link SettingsActivity}.
         if (sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none").equals("none")){
             Intent i = new Intent(this, SettingsActivity.class);
             startActivity(i);
             finish();
         }
 
+        //Make sure permission is granted to read external storage.
         if (!CheckForExtStorageReadPerm(getApplicationContext())){
             reqPerms();
         }
 
+        //Check if the AuthToken is stored in the device. If it is, launch the PINEntryActivity.
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
         if (!authPrefs.getString(PINEntryActivity.AUTH_TOKEN_KEY, "").equals("")){
             LaunchPINEntryActivity();
@@ -249,6 +269,12 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Check if the supplied Username and Password are not empty
+     * @param username The username
+     * @param password The password
+     * @return True if both aren't empty, false if at least one of them is.
+     */
     private boolean ValidateCredentials(String username, String password) {
         return !(username.length() == 0 || password.length() == 0);
     }

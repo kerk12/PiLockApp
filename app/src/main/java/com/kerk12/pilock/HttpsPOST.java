@@ -30,7 +30,7 @@ import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
 
 /**
  * Class used to perform HTTPS POST Requests. Connects to the server, performs the request, recieves the Input or Error Stream, and ends the connection.
- * TODO: Integrate it with {@see HttpsRequest}
+ * TODO: Integrate it with {@link HttpsRequest}
  */
 public class HttpsPOST {
 

@@ -33,16 +33,27 @@ public class CustomSSLTruster {
         return false;
     }
 
+    /**
+     * Used to read the certificate from a file. It looks for the pilock.crt file, and returns an InputStream that can be processed.
+     * @return InputStream of the certificate file.
+     * @throws FileNotFoundException If pilock.crt wasn't found.
+     */
     private static FileInputStream ReadCert() throws FileNotFoundException {
-
-
         FileInputStream fis = null;
+        //Read from internal storage. WARNING: Needs the appropriate permission.
         File cert = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "pilock.crt");
 
         fis = new FileInputStream(cert);
         return fis;
     }
 
+    /**
+     * Static method used to mark a supplied certificate as trusted.
+     * Taken from @see <a href="https://developer.android.com/training/articles/security-ssl.html#UnknownCa">https://developer.android.com/training/articles/security-ssl.html#UnknownCa</a>
+     * @return A new SSLContext, used in connections.
+     * @throws IOException If an error occurs while reading the file.
+     * @throws GeneralSecurityException If a security related error occurs.
+     */
     public static SSLContext TrustCertificate() throws IOException, GeneralSecurityException {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream caInput = null;
@@ -72,7 +83,7 @@ public class CustomSSLTruster {
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
         tmf.init(keyStore);
 
-// Create an SSLContext that uses our TrustManager
+        // Create an SSLContext that uses our TrustManager
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, tmf.getTrustManagers(), null);
 

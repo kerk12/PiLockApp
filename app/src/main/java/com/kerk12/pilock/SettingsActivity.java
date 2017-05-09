@@ -29,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        //Check if the user entered a URL, if not, exit...
         if (sharedPrefs.getString(SERVER_ADDRESS_KEY, "none").equals("none")){
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_server_url_detected), Toast.LENGTH_LONG).show();
             moveTaskToBack(true);

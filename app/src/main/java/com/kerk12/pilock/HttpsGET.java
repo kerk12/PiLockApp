@@ -77,6 +77,7 @@ public class HttpsGET extends HttpsRequest {
             conn.setReadTimeout(5000);
 
             ResponseCode = conn.getResponseCode();
+            //Check the response code, and read the stream. If the response code indicates an error, read the error stream.
             if (ResponseCode == HTTP_OK){
                 ResponseStream = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(ResponseStream, "UTF-8"));
