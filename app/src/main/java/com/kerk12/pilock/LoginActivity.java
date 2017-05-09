@@ -294,7 +294,22 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(i);
                 finish();
                 return true;
+            case R.id.settings_about_choice:
+                ShowAboutDialog(LoginActivity.this);
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public static void ShowAboutDialog(Context context){
+        AlertDialog.Builder bob = new AlertDialog.Builder(context);
+        bob.setTitle("About PiLock")
+                .setMessage(context.getResources().getString(R.string.about_message))
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).show();
     }
 }

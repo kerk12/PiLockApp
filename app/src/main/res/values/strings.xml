@@ -32,4 +32,5 @@
     <string name="no_server_url_detected">No server URL has been entered. Exiting...</string>
     <string name="http_not_supported">Plain HTTP is not supported. Please use HTTP over SSL (HTTPS).</string>
     <string name="settings_server_address_summary">The URL of the PiLock Server.</string>
+    <string name="about_message">PiLock Client\nDesigned by Kyriakos Giannakis.\n\nThe app is released under the GNU GPLv3 licence.</string>
 </resources>

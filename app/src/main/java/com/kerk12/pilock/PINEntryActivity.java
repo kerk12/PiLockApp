@@ -192,6 +192,9 @@ public class PINEntryActivity extends AppCompatActivity {
                 Intent i = new Intent(this, ChangePinActivity.class);
                 startActivity(i);
                 return true;
+            case R.id.change_pin_about:
+                LoginActivity.ShowAboutDialog(PINEntryActivity.this);
+                return true;
         }
         return false;
     }

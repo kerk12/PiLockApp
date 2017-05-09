@@ -5,4 +5,8 @@
     <item
         android:id="@+id/change_pin_menu_choice"
         android:title="Change PIN" />
+    <item
+        android:id="@+id/change_pin_about"
+        android:title="About"
+        />
 </menu>
