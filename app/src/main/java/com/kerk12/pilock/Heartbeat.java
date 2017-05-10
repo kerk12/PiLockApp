@@ -32,7 +32,7 @@ public class Heartbeat {
             url = new URL(sharedPreferences.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none"));
 
             //Perform a GET request to the root page.
-            HttpsGET get = new HttpsGET(url);
+            HttpsGET get = new HttpsGET(url, true);
             get.setSslSocketFactory(CustomSSLTruster.TrustCertificate().getSocketFactory());
             get.SendGET(context);
 

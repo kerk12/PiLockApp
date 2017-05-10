@@ -57,6 +57,8 @@ public class HttpsRequest {
      */
     private String Response = null;
 
+    private boolean NeedsWifi = false;
+
     /**
      * Constructor used when there are parameters to be passed along with the request.
      * @param url The page to send the request to.
@@ -75,7 +77,16 @@ public class HttpsRequest {
         this.url = url;
     }
 
+    public HttpsRequest(URL url, boolean NeedsWifi){
+        this.url = url;
+        this.NeedsWifi = NeedsWifi;
+    }
 
+    public HttpsRequest(URL url, Map<String, String> params, boolean needsWifi) {
+        this.url = url;
+        this.params = params;
+        NeedsWifi = needsWifi;
+    }
 
     public SSLSocketFactory getSslSocketFactory() {
         return sslSocketFactory;
@@ -85,6 +96,11 @@ public class HttpsRequest {
         this.sslSocketFactory = sslSocketFactory;
     }
 
+    /**
+     * Checks if the user's device is connected to a WiFi Network.
+     * @param context The app's context.
+     * @return True if the device is connected to a WiFi network, false if it's not.
+     */
     public static boolean IsConnectedToWiFi(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
@@ -94,6 +110,17 @@ public class HttpsRequest {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if the user's device is connected to the internet.
+     * @param context The app's context.
+     * @return True if the device is connected to the internet, false if it's not.
+     */
+    public static boolean IsConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info != null && info.isConnected();
     }
 
     public HttpsConnectionError getError() {
@@ -151,5 +178,13 @@ public class HttpsRequest {
 
     public void setHasError(Boolean hasError) {
         HasError = hasError;
+    }
+
+    public boolean NeedsWifi() {
+        return NeedsWifi;
+    }
+
+    public void setNeedsWifi(boolean needsWifi) {
+        NeedsWifi = needsWifi;
     }
 }

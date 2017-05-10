@@ -19,6 +19,7 @@ import javax.net.ssl.SSLSession;
 
 import static com.kerk12.pilock.HttpsConnectionError.CONNECTION_ERROR;
 import static com.kerk12.pilock.HttpsConnectionError.INVALID_CERTIFICATE;
+import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_INTERNET;
 import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
 import static java.net.HttpURLConnection.HTTP_OK;
 
@@ -42,6 +43,23 @@ public class HttpsGET extends HttpsRequest {
         super(url);
     }
 
+    /**
+     * Requires the server's URL and whether the connection can be performed only on WiFi
+     * @param url
+     * @param NeedsWifi
+     */
+    public HttpsGET(URL url, boolean NeedsWifi) {
+        super(url, NeedsWifi);
+    }
+
+    /**
+     * Requires the server's URL, the request parameters and whether the connection can be performed only on WiFi
+     * @param url
+     * @param needsWifi
+     */
+    public HttpsGET(URL url, Map<String, String> params, boolean needsWifi) {
+        super(url, params, needsWifi);
+    }
 
     /**
      * AsyncTask responsible for sending the GET request.
@@ -128,7 +146,13 @@ public class HttpsGET extends HttpsRequest {
     public void SendGET(Context context){
         //Check if the phone is connected to WiFi
         //TODO Make it customizable.
-        if (IsConnectedToWiFi(context)) {
+        if (NeedsWifi()){
+            if (!IsConnectedToWiFi(context)){
+                setError(NOT_CONNECTED_TO_WIFI);
+                return;
+            }
+        }
+        if (IsConnected(context)) {
             GETTask get = new GETTask();
             try {
                 super.setResponse(get.execute().get());
@@ -138,7 +162,7 @@ public class HttpsGET extends HttpsRequest {
                 e.printStackTrace();
             }
         } else {
-            setError(NOT_CONNECTED_TO_WIFI);
+            setError(NOT_CONNECTED_TO_INTERNET);
         }
     }
 }

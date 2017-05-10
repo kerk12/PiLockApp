@@ -10,4 +10,5 @@ public enum HttpsConnectionError {
     INVALID_CERTIFICATE,
     CONNECTION_ERROR,
     NOT_CONNECTED_TO_WIFI,
+    NOT_CONNECTED_TO_INTERNET,
 }
