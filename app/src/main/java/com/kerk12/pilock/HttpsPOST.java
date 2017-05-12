@@ -34,6 +34,12 @@ import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
  */
 public class HttpsPOST {
 
+    public interface HttpsRequestListener {
+        void onRequestCompleted();
+    }
+
+    private HttpsRequestListener listener = null;
+
     public class POSTNotExecutedException extends Exception{
         public POSTNotExecutedException(){
             super("The POST Request hasn't been Executed yet. Call SendPOST(Context context) first.");
@@ -190,6 +196,16 @@ public class HttpsPOST {
             }
             return null;
         }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (listener != null) {
+                result = s;
+                Executed = true;
+                listener.onRequestCompleted();
+            }
+            super.onPostExecute(s);
+        }
     }
 
     /**
@@ -208,29 +224,23 @@ public class HttpsPOST {
      */
     public void SendPOST(Context context){
         if (!Executed){
-            if (IsConnectedToWiFi(context)){
-                POSTTask t = new POSTTask();
-                try {
-                    result = t.execute().get();
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (IsConnectedToWiFi(context)){
+                    POSTTask t = new POSTTask();
+                        t.execute();
+                } else {
+                    error = NOT_CONNECTED_TO_WIFI;
                     HasErrors = true;
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                    HasErrors = true;
-                } finally {
                     Executed = true;
                 }
-            } else {
-                HasErrors = true;
-                error = HttpsConnectionError.CONNECTION_ERROR;
-                Executed = true;
-            }
-
-
+        } else {
+            HasErrors = true;
+            error = HttpsConnectionError.CONNECTION_ERROR;
+            Executed = true;
         }
+
+
     }
+
 
     /**
      * Returns the response code recieved from the server after executing the request.
@@ -255,4 +265,9 @@ public class HttpsPOST {
     public HttpsConnectionError getError() {
         return error;
     }
+
+    public void setListener(HttpsRequestListener listener) {
+        this.listener = listener;
+    }
+
 }

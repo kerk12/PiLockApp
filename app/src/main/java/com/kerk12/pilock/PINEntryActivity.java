@@ -78,7 +78,6 @@ public class PINEntryActivity extends AppCompatActivity {
                     break;
             }
         }
-        unlockButton.setEnabled(true);
     }
 
     EditText pinET;
@@ -146,6 +145,7 @@ public class PINEntryActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 unlockButton.setEnabled(false);
+                pinET.setEnabled(false);
                 //TODO Validate the input.
                 if (!ValidatePIN(PIN)) {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
@@ -169,10 +169,18 @@ public class PINEntryActivity extends AppCompatActivity {
                 params.put(getResources().getString(R.string.auth_token_params), AuthToken);
                 params.put(getResources().getString(R.string.pin_params), PIN);
 
-                HttpsPOST post = new HttpsPOST(unlockURL, params);
+                final HttpsPOST post = new HttpsPOST(unlockURL, params);
+                post.setListener(new HttpsPOST.HttpsRequestListener() {
+                    @Override
+                    public void onRequestCompleted() {
+                        PerformAfterPOSTCheck(post);
+                        unlockButton.setEnabled(true);
+                        pinET.setEnabled(true);
+                        pinET.setText("");
+                    }
+                });
                 post.SendPOST(getApplicationContext());
-                PerformAfterPOSTCheck(post);
-                pinET.setText("");
+
             }
         });
 

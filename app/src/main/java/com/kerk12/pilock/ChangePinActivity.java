@@ -121,7 +121,8 @@ public class ChangePinActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Disable the button temporarily
                 submitButton.setEnabled(false);
-
+                newPinET.setEnabled(false);
+                oldPinET.setEnabled(false);
                 if (!(PINEntryActivity.ValidatePIN(newPin) && PINEntryActivity.ValidatePIN(oldPin)) ){
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
                     submitButton.setEnabled(true);
@@ -140,9 +141,18 @@ public class ChangePinActivity extends AppCompatActivity {
                     params.put("oldPin", oldPin);
                     params.put("newPin", newPin);
 
-                    HttpsPOST post = new HttpsPOST(changePinURL, params);
+                    final HttpsPOST post = new HttpsPOST(changePinURL, params);
+                    post.setListener(new HttpsPOST.HttpsRequestListener() {
+                        @Override
+                        public void onRequestCompleted() {
+                            PerformAfterPostCheck(post);
+                            submitButton.setEnabled(true);
+                            newPinET.setEnabled(true);
+                            oldPinET.setEnabled(true);
+                        }
+                    });
                     post.SendPOST(getApplicationContext());
-                    PerformAfterPostCheck(post);
+
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }

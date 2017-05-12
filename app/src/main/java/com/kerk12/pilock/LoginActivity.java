@@ -253,9 +253,16 @@ public class LoginActivity extends AppCompatActivity {
                     Map<String, String> params = new HashMap<String, String>();
                     params.put(getResources().getString(R.string.username_params), username);
                     params.put(getResources().getString(R.string.password_params), password);
-                    HttpsPOST post = new HttpsPOST(LoginURL, params);
+                    final HttpsPOST post = new HttpsPOST(LoginURL, params);
+                    post.setListener(new HttpsPOST.HttpsRequestListener() {
+                        @Override
+                        public void onRequestCompleted() {
+                            PerformAfterPOSTCheck(post);
+                            passwordET.setText("");
+                        }
+                    });
                     post.SendPOST(getApplicationContext());
-                    PerformAfterPOSTCheck(post);
+
 
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
