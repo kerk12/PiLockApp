@@ -38,7 +38,7 @@ public class ChangePinActivity extends AppCompatActivity {
     String AuthToken = null;
 
     private void PerformAfterPostCheck(HttpsPOST post){
-        if (post.HasErrors()){
+        if (post.hasError()){
             switch (post.getError()){
                 case INVALID_CERTIFICATE:
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_cert), Toast.LENGTH_LONG).show();

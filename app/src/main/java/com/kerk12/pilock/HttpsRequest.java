@@ -34,6 +34,13 @@ public class HttpsRequest {
      * Instance of the {@see HttpsConnectionError} enum used for representing errors.
      */
     private HttpsConnectionError error = null;
+
+    public class RequestNotExecutedException extends Exception{
+        public RequestNotExecutedException(){
+            super("The POST Request hasn't been Executed yet. Call SendPOST(Context context) first.");
+        }
+    }
+
     /**
      * Boolean indicating if the connection has errors.
      */
@@ -52,12 +59,20 @@ public class HttpsRequest {
      * The error stream of the response. Used whenever the response code indicates an error.
      */
     protected InputStream ErrorStream = null;
+    protected String ErrorStreamStr;
     /**
      * The final response, as a string.
      */
     private String Response = null;
+    private boolean Executed = false;
 
     private boolean NeedsWifi = false;
+
+    public interface HttpsRequestListener {
+        void onRequestCompleted();
+    }
+
+    protected HttpsRequestListener listener = null;
 
     /**
      * Constructor used when there are parameters to be passed along with the request.
@@ -131,26 +146,6 @@ public class HttpsRequest {
         return ResponseCode;
     }
 
-    public void setResponseCode(int responseCode) {
-        ResponseCode = responseCode;
-    }
-
-    public InputStream getResponseStream() {
-        return ResponseStream;
-    }
-
-    public void setResponseStream(InputStream responseStream) {
-        ResponseStream = responseStream;
-    }
-
-    public InputStream getErrorStream() {
-        return ErrorStream;
-    }
-
-    public void setErrorStream(InputStream errorStream) {
-        ErrorStream = errorStream;
-    }
-
     public void setError(HttpsConnectionError error) {
         HasError = true;
         this.error = error;
@@ -164,7 +159,10 @@ public class HttpsRequest {
         return params;
     }
 
-    public String getResponse() {
+    public String getResponse() throws RequestNotExecutedException {
+        if (!isExecuted()){
+            throw new RequestNotExecutedException();
+        }
         return Response;
     }
 
@@ -172,13 +170,10 @@ public class HttpsRequest {
         Response = response;
     }
 
-    public Boolean getHasError() {
+    public Boolean hasError() {
         return HasError;
     }
 
-    public void setHasError(Boolean hasError) {
-        HasError = hasError;
-    }
 
     public boolean NeedsWifi() {
         return NeedsWifi;
@@ -186,5 +181,17 @@ public class HttpsRequest {
 
     public void setNeedsWifi(boolean needsWifi) {
         NeedsWifi = needsWifi;
+    }
+
+    public boolean isExecuted() {
+        return Executed;
+    }
+
+    public void setExecuted(boolean executed) {
+        Executed = executed;
+    }
+
+    public void setListener(HttpsRequestListener listener) {
+        this.listener = listener;
     }
 }

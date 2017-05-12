@@ -136,7 +136,15 @@ public class HttpsGET extends HttpsRequest {
             return null;
         }
 
-
+        @Override
+        protected void onPostExecute(String s) {
+            if (listener != null){
+                setResponse(s);
+                listener.onRequestCompleted();
+            }
+            setExecuted(true);
+            super.onPostExecute(s);
+        }
     }
 
     /**
@@ -154,8 +162,9 @@ public class HttpsGET extends HttpsRequest {
         }
         if (IsConnected(context)) {
             GETTask get = new GETTask();
+            get.execute();
             try {
-                super.setResponse(get.execute().get());
+                setResponse(get.get());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {

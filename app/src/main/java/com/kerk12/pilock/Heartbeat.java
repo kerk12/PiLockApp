@@ -5,10 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import static java.net.HttpURLConnection.HTTP_BAD_GATEWAY;
@@ -37,7 +35,7 @@ public class Heartbeat {
             get.SendGET(context);
 
             //Check for errors
-            if (get.getHasError()){
+            if (get.hasError()){
                 switch(get.getError()){
                     case INVALID_CERTIFICATE:
                         Toast.makeText(context, context.getResources().getString(R.string.invalid_cert), Toast.LENGTH_LONG).show();

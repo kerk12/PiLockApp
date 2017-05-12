@@ -49,7 +49,7 @@ public class PINEntryActivity extends AppCompatActivity {
 
     private void PerformAfterPOSTCheck(HttpsPOST post){
         int ResponseCode = post.getResponseCode();
-        if (post.HasErrors()){
+        if (post.hasError()){
             HttpsConnectionError error = post.getError();
             switch (error){
                 case INVALID_CERTIFICATE:
@@ -67,9 +67,9 @@ public class PINEntryActivity extends AppCompatActivity {
                 case HTTP_OK:
                     String result = null;
                     try {
-                        result = post.getResult();
+                        result = post.getResponse();
                         AnalyzeResult(result);
-                    } catch (HttpsPOST.POSTNotExecutedException e) {
+                    } catch (HttpsRequest.RequestNotExecutedException e) {
                         e.printStackTrace();
                     }
                     break;

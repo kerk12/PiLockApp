@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,38 +26,10 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.TrustManagerFactory;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
@@ -104,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void PerformAfterPOSTCheck(HttpsPOST post){
         int ResponseCode = post.getResponseCode();
-        if (post.HasErrors()){
+        if (post.hasError()){
             HttpsConnectionError error = post.getError();
             switch (error){
                 case INVALID_CERTIFICATE:
@@ -122,9 +93,9 @@ public class LoginActivity extends AppCompatActivity {
                 case HTTP_OK:
                     String result = null;
                     try {
-                        result = post.getResult();
+                        result = post.getResponse();
                         AnalyzeJSONResponse(result);
-                    } catch (HttpsPOST.POSTNotExecutedException e) {
+                    } catch (HttpsRequest.RequestNotExecutedException e) {
                         e.printStackTrace();
                     }
                     break;

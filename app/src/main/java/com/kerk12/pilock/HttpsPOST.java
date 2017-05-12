@@ -1,5 +1,6 @@
 package com.kerk12.pilock;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -25,6 +26,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 
+import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_INTERNET;
 import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
 
 
@@ -32,66 +34,11 @@ import static com.kerk12.pilock.HttpsConnectionError.NOT_CONNECTED_TO_WIFI;
  * Class used to perform HTTPS POST Requests. Connects to the server, performs the request, recieves the Input or Error Stream, and ends the connection.
  * TODO: Integrate it with {@link HttpsRequest}
  */
-public class HttpsPOST {
+public class HttpsPOST extends HttpsRequest{
 
-    public interface HttpsRequestListener {
-        void onRequestCompleted();
-    }
 
-    private HttpsRequestListener listener = null;
 
-    public class POSTNotExecutedException extends Exception{
-        public POSTNotExecutedException(){
-            super("The POST Request hasn't been Executed yet. Call SendPOST(Context context) first.");
-        }
-    }
 
-    public static boolean IsConnectedToWiFi(Context context){
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        if (info != null && info.isConnected()){
-            if (info.getType() == ConnectivityManager.TYPE_WIFI){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private URL url = null;
-    /**
-     * The POST request data parameters.
-     */
-    private Map<String, String> params = null;
-    /**
-     * The final recieved {@link InputStream}, decoded to a String.
-     */
-    private String result = null;
-    /**
-     * Boolean indicating whether the post has been sent or not.
-     */
-    private boolean Executed = false;
-    private int ResponseCode = -1;
-    /**
-     * The Error Stream decoded into a string. Used if a connection fails.
-     */
-    private String ErrorStream = null;
-    /**
-     * Boolean variable indicating whether the connection was completed successfully or not.
-     */
-    private boolean HasErrors = false;
-    private boolean CertError = false;
-    private HttpsConnectionError error = null;
-
-//    /**
-//     * Enum used to indicate possible connection errors.
-//     * INVALID_CERTIFICATE: Invalid certificate. Connection aborted.
-//     * CONNECTION_ERROR: An error occurred while trying to reach the server.
-//     */
-//    public enum HttpsConnectionError{
-//        INVALID_CERTIFICATE,
-//        CONNECTION_ERROR,
-//        NOT_CONNECTED_TO_WIFI,
-//    }
 
     /**
      * Default constructor. Takes the server page's URL, along with the mapped data.
@@ -99,8 +46,7 @@ public class HttpsPOST {
      * @param params The data parameters, mapped as String key=value pairs. See {@link QueryBuilder} for more.
      */
     public HttpsPOST(URL url, Map<String, String> params) {
-        this.url = url;
-        this.params = params;
+        super(url, params);
     }
 
     private class POSTTask extends AsyncTask<Void, Void, String>{
@@ -115,7 +61,7 @@ public class HttpsPOST {
 
             // Set the SSLContext, so that it trusts our Self-Signed Certificate.
             SSLContext sslContext = CustomSSLTruster.TrustCertificate();
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            HttpsURLConnection conn = (HttpsURLConnection) getUrl().openConnection();
             conn.setSSLSocketFactory(sslContext.getSocketFactory());
             // Set the hostname verifier to verify all hostnames.
             // If the hostname is an IP it doesn't get verified by default, unless this is inserted...
@@ -135,7 +81,7 @@ public class HttpsPOST {
             conn.setReadTimeout(15000);
 
             // Write the POST data...
-            QueryBuilder builder = new QueryBuilder(params);
+            QueryBuilder builder = new QueryBuilder(getParams());
             OutputStream os = conn.getOutputStream();
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
             writer.write(builder.getQuery());
@@ -160,8 +106,8 @@ public class HttpsPOST {
 
                 return sb.toString();
             } else {
-                InputStream ErrorIStream = conn.getErrorStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(ErrorIStream, "UTF-8"), 8);
+                ErrorStream = conn.getErrorStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ErrorStream, "UTF-8"), 8);
                 String line = null;
                 StringBuilder sb = new StringBuilder();
 
@@ -170,7 +116,7 @@ public class HttpsPOST {
                 }
                 reader.close();
 
-                ErrorStream = sb.toString();
+                ErrorStreamStr = sb.toString();
             }
             return null;
 
@@ -182,17 +128,13 @@ public class HttpsPOST {
             try {
                 return getResult();
             } catch (SSLHandshakeException e){
-                HasErrors = true;
-                error = HttpsConnectionError.INVALID_CERTIFICATE;
+                setError(HttpsConnectionError.INVALID_CERTIFICATE);
             } catch (IOException e) {
                 e.printStackTrace();
-                HasErrors = true;
-                error = HttpsConnectionError.CONNECTION_ERROR;
+                setError(HttpsConnectionError.CONNECTION_ERROR);
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();
-                HasErrors = true;
-                CertError = true;
-                error = HttpsConnectionError.INVALID_CERTIFICATE;
+                setError(HttpsConnectionError.INVALID_CERTIFICATE);
             }
             return null;
         }
@@ -200,8 +142,8 @@ public class HttpsPOST {
         @Override
         protected void onPostExecute(String s) {
             if (listener != null) {
-                result = s;
-                Executed = true;
+                setResponse(s);
+                setExecuted(true);
                 listener.onRequestCompleted();
             }
             super.onPostExecute(s);
@@ -209,65 +151,27 @@ public class HttpsPOST {
     }
 
     /**
-     * Get the result string from the post request.
-     * @return A string with the recieved data, null on connection error.
-     */
-    public String getResult() throws POSTNotExecutedException {
-        if (!Executed){
-            throw new POSTNotExecutedException();
-        }
-        return result;
-    }
-
-    /**
      * Sends the POST request.
      */
     public void SendPOST(Context context){
-        if (!Executed){
-                if (IsConnectedToWiFi(context)){
+        if (!isExecuted()){
+            if (NeedsWifi()) {
+                if (IsConnectedToWiFi(context)) {
                     POSTTask t = new POSTTask();
-                        t.execute();
+                    t.execute();
                 } else {
-                    error = NOT_CONNECTED_TO_WIFI;
-                    HasErrors = true;
-                    Executed = true;
+                    setError(NOT_CONNECTED_TO_WIFI);
                 }
-        } else {
-            HasErrors = true;
-            error = HttpsConnectionError.CONNECTION_ERROR;
-            Executed = true;
+            } else {
+                if (IsConnected(context)){
+                    POSTTask t = new POSTTask();
+                    t.execute();
+                } else {
+                    setError(NOT_CONNECTED_TO_INTERNET);
+                }
+            }
+            setExecuted(true);
         }
-
-
-    }
-
-
-    /**
-     * Returns the response code recieved from the server after executing the request.
-     * @return The response code.
-     */
-    public int getResponseCode() {
-        return ResponseCode;
-    }
-
-    public String getErrorStream() {
-        return ErrorStream;
-    }
-
-    public boolean HasErrors() {
-        return HasErrors;
-    }
-
-    public boolean HasCertError() {
-        return CertError;
-    }
-
-    public HttpsConnectionError getError() {
-        return error;
-    }
-
-    public void setListener(HttpsRequestListener listener) {
-        this.listener = listener;
     }
 
 }
