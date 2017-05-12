@@ -123,6 +123,7 @@ public class HttpsGET extends HttpsRequest {
         protected String doInBackground(Void... params) {
             try {
                 String resp = getResponse();
+                setExecuted(true);
                 return resp;
             } catch (SSLHandshakeException e){
                 setError(INVALID_CERTIFICATE);
@@ -138,11 +139,10 @@ public class HttpsGET extends HttpsRequest {
 
         @Override
         protected void onPostExecute(String s) {
-            if (listener != null){
+            if (RequestListener != null){
                 setResponse(s);
-                listener.onRequestCompleted();
+                RequestListener.onRequestCompleted();
             }
-            setExecuted(true);
             super.onPostExecute(s);
         }
     }

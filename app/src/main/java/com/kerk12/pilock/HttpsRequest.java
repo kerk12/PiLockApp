@@ -35,6 +35,9 @@ public class HttpsRequest {
      */
     private HttpsConnectionError error = null;
 
+    /**
+     * Exception thrown when trying to query a request object's data before it was sent.
+     */
     public class RequestNotExecutedException extends Exception{
         public RequestNotExecutedException(){
             super("The POST Request hasn't been Executed yet. Call SendPOST(Context context) first.");
@@ -59,6 +62,7 @@ public class HttpsRequest {
      * The error stream of the response. Used whenever the response code indicates an error.
      */
     protected InputStream ErrorStream = null;
+
     protected String ErrorStreamStr;
     /**
      * The final response, as a string.
@@ -68,11 +72,14 @@ public class HttpsRequest {
 
     private boolean NeedsWifi = false;
 
+    /**
+     * Interface used to create callbacks, after the request has been completed.
+     */
     public interface HttpsRequestListener {
         void onRequestCompleted();
     }
 
-    protected HttpsRequestListener listener = null;
+    protected HttpsRequestListener RequestListener = null;
 
     /**
      * Constructor used when there are parameters to be passed along with the request.
@@ -191,7 +198,11 @@ public class HttpsRequest {
         Executed = executed;
     }
 
-    public void setListener(HttpsRequestListener listener) {
-        this.listener = listener;
+    public void setRequestListener(HttpsRequestListener requestListener) {
+        this.RequestListener = requestListener;
+    }
+
+    public String getErrorStream() {
+        return ErrorStreamStr;
     }
 }

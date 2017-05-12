@@ -1,5 +1,6 @@
 package com.kerk12.pilock;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -154,6 +155,7 @@ public class PINEntryActivity extends AppCompatActivity {
                 }
                 if (!Heartbeat.isAlive(getApplicationContext())){
                     unlockButton.setEnabled(true);
+                    pinET.setEnabled(true);
                     return;
                 }
 
@@ -169,11 +171,13 @@ public class PINEntryActivity extends AppCompatActivity {
                 params.put(getResources().getString(R.string.auth_token_params), AuthToken);
                 params.put(getResources().getString(R.string.pin_params), PIN);
 
+                final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
                 final HttpsPOST post = new HttpsPOST(unlockURL, params);
-                post.setListener(new HttpsPOST.HttpsRequestListener() {
+                post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
                     @Override
                     public void onRequestCompleted() {
                         PerformAfterPOSTCheck(post);
+                        dialog.dismiss();
                         unlockButton.setEnabled(true);
                         pinET.setEnabled(true);
                         pinET.setText("");

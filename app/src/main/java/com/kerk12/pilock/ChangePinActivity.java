@@ -131,6 +131,8 @@ public class ChangePinActivity extends AppCompatActivity {
 
                 if (!Heartbeat.isAlive(getApplicationContext())){
                     submitButton.setEnabled(true);
+                    newPinET.setEnabled(true);
+                    oldPinET.setEnabled(true);
                     return;
                 }
 
@@ -142,7 +144,7 @@ public class ChangePinActivity extends AppCompatActivity {
                     params.put("newPin", newPin);
 
                     final HttpsPOST post = new HttpsPOST(changePinURL, params);
-                    post.setListener(new HttpsPOST.HttpsRequestListener() {
+                    post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
                         @Override
                         public void onRequestCompleted() {
                             PerformAfterPostCheck(post);

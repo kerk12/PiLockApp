@@ -1,9 +1,6 @@
 package com.kerk12.pilock;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -14,11 +11,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.ResponseCache;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -50,6 +45,12 @@ public class HttpsPOST extends HttpsRequest{
     }
 
     private class POSTTask extends AsyncTask<Void, Void, String>{
+
+        @Override
+        protected void onPreExecute() {
+            setExecuted(true);
+            super.onPreExecute();
+        }
 
         /**
          * Sends the POST request and recieves a result string.
@@ -141,10 +142,9 @@ public class HttpsPOST extends HttpsRequest{
 
         @Override
         protected void onPostExecute(String s) {
-            if (listener != null) {
+            if (RequestListener != null) {
                 setResponse(s);
-                setExecuted(true);
-                listener.onRequestCompleted();
+                RequestListener.onRequestCompleted();
             }
             super.onPostExecute(s);
         }
@@ -170,7 +170,6 @@ public class HttpsPOST extends HttpsRequest{
                     setError(NOT_CONNECTED_TO_INTERNET);
                 }
             }
-            setExecuted(true);
         }
     }
 
