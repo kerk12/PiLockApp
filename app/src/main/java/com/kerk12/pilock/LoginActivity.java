@@ -205,47 +205,61 @@ public class LoginActivity extends AppCompatActivity {
                     loginButton.setEnabled(true);
                     return;
                 }
-                if (!Heartbeat.isAlive(getApplicationContext())){
-                    loginButton.setEnabled(true);
-                    return;
-                }
-                username = usernameET.getText().toString();
-                password = passwordET.getText().toString();
+                Heartbeat hb = new Heartbeat();
+                hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
+                    @Override
+                    public void onHeartbeatSuccess() {
+                        username = usernameET.getText().toString();
+                        password = passwordET.getText().toString();
 
-                if (!ValidateCredentials(username, password)){
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.please_enter_username_and_password), Toast.LENGTH_LONG).show();
-                    loginButton.setEnabled(true);
-                    usernameET.setEnabled(true);
-                    passwordET.setEnabled(true);
-                    return;
-                }
-
-
-                try {
-
-                    String serverURL = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
-                    URL LoginURL = new URL(serverURL+"/login");
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put(getResources().getString(R.string.username_params), username);
-                    params.put(getResources().getString(R.string.password_params), password);
-                    final HttpsPOST post = new HttpsPOST(LoginURL, params);
-                    post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
-                        @Override
-                        public void onRequestCompleted() {
-                            PerformAfterPOSTCheck(post);
+                        if (!ValidateCredentials(username, password)){
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.please_enter_username_and_password), Toast.LENGTH_LONG).show();
+                            loginButton.setEnabled(true);
                             usernameET.setEnabled(true);
                             passwordET.setEnabled(true);
-                            passwordET.setText("");
+                            return;
                         }
-                    });
-                    post.SendPOST(getApplicationContext());
 
 
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } finally {
-                    loginButton.setEnabled(true);
-                }
+                        try {
+
+                            String serverURL = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
+                            URL LoginURL = new URL(serverURL+"/login");
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put(getResources().getString(R.string.username_params), username);
+                            params.put(getResources().getString(R.string.password_params), password);
+                            final HttpsPOST post = new HttpsPOST(LoginURL, params);
+                            post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
+                                @Override
+                                public void onRequestCompleted() {
+                                    PerformAfterPOSTCheck(post);
+                                    usernameET.setEnabled(true);
+                                    passwordET.setEnabled(true);
+                                    passwordET.setText("");
+                                }
+                            });
+                            post.SendPOST(getApplicationContext());
+
+
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        } finally {
+                            loginButton.setEnabled(true);
+                        }
+                    }
+
+                    @Override
+                    public void onHeartbeatFailure() {
+                        loginButton.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onHeartbeatFinished() {
+
+                    }
+                });
+                hb.SendHeartbeat(getApplicationContext());
+
 
 
 

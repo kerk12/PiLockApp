@@ -72,6 +72,8 @@ public class HttpsRequest {
 
     private boolean NeedsWifi = false;
 
+    protected int ConnectTimeout, ReadTimeout = 5000;
+
     /**
      * Interface used to create callbacks, after the request has been completed.
      */
@@ -204,5 +206,13 @@ public class HttpsRequest {
 
     public String getErrorStream() {
         return ErrorStreamStr;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        ConnectTimeout = connectTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        ReadTimeout = readTimeout;
     }
 }

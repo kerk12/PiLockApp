@@ -153,37 +153,51 @@ public class PINEntryActivity extends AppCompatActivity {
                     unlockButton.setEnabled(true);
                     return;
                 }
-                if (!Heartbeat.isAlive(getApplicationContext())){
-                    unlockButton.setEnabled(true);
-                    pinET.setEnabled(true);
-                    return;
-                }
-
-                URL unlockURL = null;
-                try {
-                    unlockURL = new URL(ServerURL+"/authentication");
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-
-
-                Map<String, String> params = new HashMap<String, String>();
-                params.put(getResources().getString(R.string.auth_token_params), AuthToken);
-                params.put(getResources().getString(R.string.pin_params), PIN);
-
-                final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
-                final HttpsPOST post = new HttpsPOST(unlockURL, params);
-                post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
+                final ProgressDialog hbdial = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
+                Heartbeat hb = new Heartbeat();
+                hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
                     @Override
-                    public void onRequestCompleted() {
-                        PerformAfterPOSTCheck(post);
-                        dialog.dismiss();
+                    public void onHeartbeatSuccess() {
+                        URL unlockURL = null;
+                        try {
+                            unlockURL = new URL(ServerURL+"/authentication");
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+
+
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                        params.put(getResources().getString(R.string.pin_params), PIN);
+
+                        final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
+                        final HttpsPOST post = new HttpsPOST(unlockURL, params);
+                        post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
+                            @Override
+                            public void onRequestCompleted() {
+                                PerformAfterPOSTCheck(post);
+                                dialog.dismiss();
+                                unlockButton.setEnabled(true);
+                                pinET.setEnabled(true);
+                                pinET.setText("");
+                            }
+                        });
+                        post.SendPOST(getApplicationContext());
+                    }
+
+                    @Override
+                    public void onHeartbeatFailure() {
                         unlockButton.setEnabled(true);
                         pinET.setEnabled(true);
-                        pinET.setText("");
+                    }
+
+                    @Override
+                    public void onHeartbeatFinished() {
+                        hbdial.dismiss();
                     }
                 });
-                post.SendPOST(getApplicationContext());
+                hb.SendHeartbeat(getApplicationContext());
+
 
             }
         });

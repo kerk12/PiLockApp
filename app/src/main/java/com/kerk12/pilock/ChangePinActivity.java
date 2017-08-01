@@ -65,6 +65,9 @@ public class ChangePinActivity extends AppCompatActivity {
                     break;
             }
         }
+        submitButton.setEnabled(true);
+        newPinET.setEnabled(true);
+        oldPinET.setEnabled(true);
     }
 
     @Override
@@ -129,35 +132,47 @@ public class ChangePinActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (!Heartbeat.isAlive(getApplicationContext())){
-                    submitButton.setEnabled(true);
-                    newPinET.setEnabled(true);
-                    oldPinET.setEnabled(true);
-                    return;
-                }
+                Heartbeat hb = new Heartbeat();
+                hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
+                    @Override
+                    public void onHeartbeatSuccess() {
+                        try {
+                            URL changePinURL = new URL(ChangePinURL);
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                            params.put("oldPin", oldPin);
+                            params.put("newPin", newPin);
 
-                try {
-                    URL changePinURL = new URL(ChangePinURL);
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put(getResources().getString(R.string.auth_token_params), AuthToken);
-                    params.put("oldPin", oldPin);
-                    params.put("newPin", newPin);
+                            final HttpsPOST post = new HttpsPOST(changePinURL, params);
+                            post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
+                                @Override
+                                public void onRequestCompleted() {
+                                    PerformAfterPostCheck(post);
+                                    submitButton.setEnabled(true);
+                                    newPinET.setEnabled(true);
+                                    oldPinET.setEnabled(true);
+                                }
+                            });
+                            post.SendPOST(getApplicationContext());
 
-                    final HttpsPOST post = new HttpsPOST(changePinURL, params);
-                    post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
-                        @Override
-                        public void onRequestCompleted() {
-                            PerformAfterPostCheck(post);
-                            submitButton.setEnabled(true);
-                            newPinET.setEnabled(true);
-                            oldPinET.setEnabled(true);
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
                         }
-                    });
-                    post.SendPOST(getApplicationContext());
+                    }
 
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                    @Override
+                    public void onHeartbeatFailure() {
+
+                    }
+
+                    @Override
+                    public void onHeartbeatFinished() {
+
+                    }
+                });
+                hb.SendHeartbeat(getApplicationContext());
+
+
             }
         });
 

@@ -91,8 +91,8 @@ public class HttpsGET extends HttpsRequest {
             //Define connection parameters.
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
+            conn.setConnectTimeout(ConnectTimeout);
+            conn.setReadTimeout(ReadTimeout);
 
             ResponseCode = conn.getResponseCode();
             //Check the response code, and read the stream. If the response code indicates an error, read the error stream.
@@ -163,13 +163,6 @@ public class HttpsGET extends HttpsRequest {
         if (IsConnected(context)) {
             GETTask get = new GETTask();
             get.execute();
-            try {
-                setResponse(get.get());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
         } else {
             setError(NOT_CONNECTED_TO_INTERNET);
         }

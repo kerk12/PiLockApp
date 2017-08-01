@@ -35,4 +35,6 @@
     <string name="about_message">PiLock Client\nDesigned by Kyriakos Giannakis.\n\nThe app is released under the GNU GPLv3 licence.</string>
     <string name="wait_dialog_title">Authenticating</string>
     <string name="wait_dialog">Trying to authenticate...</string>
+    <string name="heartbeat">Heartbeat</string>
+    <string name="heartbeat_text">Requesting Heartbeat...</string>
 </resources>
