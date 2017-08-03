@@ -157,6 +157,7 @@ public class HttpsGET extends HttpsRequest {
         if (NeedsWifi()){
             if (!IsConnectedToWiFi(context)){
                 setError(NOT_CONNECTED_TO_WIFI);
+                RequestListener.onRequestCompleted();
                 return;
             }
         }
@@ -165,6 +166,7 @@ public class HttpsGET extends HttpsRequest {
             get.execute();
         } else {
             setError(NOT_CONNECTED_TO_INTERNET);
+            RequestListener.onRequestCompleted();
         }
     }
 }

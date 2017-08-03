@@ -147,10 +147,10 @@ public class PINEntryActivity extends AppCompatActivity {
 
                 unlockButton.setEnabled(false);
                 pinET.setEnabled(false);
-                //TODO Validate the input.
                 if (!ValidatePIN(PIN)) {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
                     unlockButton.setEnabled(true);
+                    pinET.setEnabled(true);
                     return;
                 }
                 final ProgressDialog hbdial = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
@@ -187,13 +187,14 @@ public class PINEntryActivity extends AppCompatActivity {
 
                     @Override
                     public void onHeartbeatFailure() {
-                        unlockButton.setEnabled(true);
-                        pinET.setEnabled(true);
+
                     }
 
                     @Override
                     public void onHeartbeatFinished() {
                         hbdial.dismiss();
+                        unlockButton.setEnabled(true);
+                        pinET.setEnabled(true);
                     }
                 });
                 hb.SendHeartbeat(getApplicationContext());

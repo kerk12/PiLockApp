@@ -35,6 +35,9 @@ public class Heartbeat {
 
         //Get the server's url from the shared preferences.
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+//        if ()
+
         try {
             url = new URL(sharedPreferences.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none"));
 

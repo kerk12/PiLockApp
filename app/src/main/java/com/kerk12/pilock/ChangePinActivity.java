@@ -167,7 +167,9 @@ public class ChangePinActivity extends AppCompatActivity {
 
                     @Override
                     public void onHeartbeatFinished() {
-
+                        submitButton.setEnabled(true);
+                        newPinET.setEnabled(true);
+                        oldPinET.setEnabled(true);
                     }
                 });
                 hb.SendHeartbeat(getApplicationContext());

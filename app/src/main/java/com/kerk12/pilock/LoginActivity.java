@@ -250,11 +250,13 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onHeartbeatFailure() {
-                        loginButton.setEnabled(true);
                     }
 
                     @Override
                     public void onHeartbeatFinished() {
+                        loginButton.setEnabled(true);
+                        usernameET.setEnabled(true);
+                        passwordET.setEnabled(true);
 
                     }
                 });
