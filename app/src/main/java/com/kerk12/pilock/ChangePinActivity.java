@@ -1,5 +1,6 @@
 package com.kerk12.pilock;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -131,11 +132,13 @@ public class ChangePinActivity extends AppCompatActivity {
                     submitButton.setEnabled(true);
                     return;
                 }
+                final ProgressDialog hbdial = ProgressDialog.show(ChangePinActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
 
                 Heartbeat hb = new Heartbeat();
                 hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
                     @Override
                     public void onHeartbeatSuccess() {
+                        hbdial.dismiss();
                         try {
                             URL changePinURL = new URL(ChangePinURL);
                             Map<String, String> params = new HashMap<String, String>();
@@ -162,14 +165,15 @@ public class ChangePinActivity extends AppCompatActivity {
 
                     @Override
                     public void onHeartbeatFailure() {
-
+                        hbdial.dismiss();
+                        submitButton.setEnabled(true);
+                        newPinET.setEnabled(true);
+                        oldPinET.setEnabled(true);
                     }
 
                     @Override
                     public void onHeartbeatFinished() {
-                        submitButton.setEnabled(true);
-                        newPinET.setEnabled(true);
-                        oldPinET.setEnabled(true);
+
                     }
                 });
                 hb.SendHeartbeat(getApplicationContext());

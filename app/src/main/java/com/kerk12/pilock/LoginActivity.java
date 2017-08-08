@@ -2,6 +2,7 @@ package com.kerk12.pilock;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -205,10 +206,13 @@ public class LoginActivity extends AppCompatActivity {
                     loginButton.setEnabled(true);
                     return;
                 }
+                final ProgressDialog hbdial = ProgressDialog.show(LoginActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
+
                 Heartbeat hb = new Heartbeat();
                 hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
                     @Override
                     public void onHeartbeatSuccess() {
+                        hbdial.dismiss();
                         username = usernameET.getText().toString();
                         password = passwordET.getText().toString();
 
@@ -250,13 +254,15 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onHeartbeatFailure() {
+                        hbdial.dismiss();
+                        loginButton.setEnabled(true);
+                        usernameET.setEnabled(true);
+                        passwordET.setEnabled(true);
                     }
 
                     @Override
                     public void onHeartbeatFinished() {
-                        loginButton.setEnabled(true);
-                        usernameET.setEnabled(true);
-                        passwordET.setEnabled(true);
+
 
                     }
                 });

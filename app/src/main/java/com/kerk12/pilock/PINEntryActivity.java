@@ -187,14 +187,14 @@ public class PINEntryActivity extends AppCompatActivity {
 
                     @Override
                     public void onHeartbeatFailure() {
-
+                        hbdial.dismiss();
+                        unlockButton.setEnabled(true);
+                        pinET.setEnabled(true);
                     }
 
                     @Override
                     public void onHeartbeatFinished() {
-                        hbdial.dismiss();
-                        unlockButton.setEnabled(true);
-                        pinET.setEnabled(true);
+
                     }
                 });
                 hb.SendHeartbeat(getApplicationContext());
