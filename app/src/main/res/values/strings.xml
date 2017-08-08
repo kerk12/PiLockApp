@@ -37,4 +37,5 @@
     <string name="wait_dialog">Trying to authenticate...</string>
     <string name="heartbeat">Heartbeat</string>
     <string name="heartbeat_text">Requesting Heartbeat...</string>
+    <string name="version_err">Your app is outdated or the server software you are currently using is outdated. Please update both to the latest version.</string>
 </resources>

@@ -72,19 +72,26 @@ public class Heartbeat {
                                 //The server is alive, but the JSON needs to be checked.
                                 String response = null;
                                 String status = null;
+                                String version = null;
                                 try {
                                     response = get.getResponse();
                                     JSONObject resp = new JSONObject(response);
                                     status = resp.getString("status");
+                                    version = resp.getString("version");
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
 
-                                //TODO Check the version number.
                                 if (!status.equals("ALIVE")){
                                     //The server is locked.
                                     Toast.makeText(context, context.getResources().getString(R.string.locked), Toast.LENGTH_LONG).show();
                                     listener.onHeartbeatFailure();
+                                    return;
+                                }
+                                if (!VersionChecker.CheckVersion(version)){
+                                    Toast.makeText(context, context.getResources().getString(R.string.version_err), Toast.LENGTH_LONG).show();
+                                    listener.onHeartbeatFailure();
+                                    return;
                                 }
                                 listener.onHeartbeatSuccess();
                                 break;
