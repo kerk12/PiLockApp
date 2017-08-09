@@ -173,6 +173,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //If the Server URL is "none", then the URL hasn't been set. Launch {@link SettingsActivity}.
         if (sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none").equals("none")){
+            SettingsFragment.isFirstRun = true;
             Intent i = new Intent(this, SettingsActivity.class);
             startActivity(i);
             finish();

@@ -12,11 +12,10 @@ import android.util.Log;
 import android.util.Patterns;
 import android.widget.Toast;
 
-/**
- * Created by kerk12 on 03/04/2017.
- */
-
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    // Bored to use fragment extras, no hate plz...
+    public static boolean isFirstRun = false;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +43,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                         Toast.makeText(getActivity(), getResources().getString(R.string.http_not_supported), Toast.LENGTH_LONG).show();
                         return false;
                     }
+                    // If it's the app's first run, go back after setting the server's address.
+                    if (isFirstRun){
+                        isFirstRun = false;
+                        Intent intent = new Intent(getActivity(), LoginActivity.class);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }
                     return true;
                 }
                 Toast.makeText(getActivity(), "The Server URL you have provided is invalid.", Toast.LENGTH_LONG).show();
@@ -55,6 +61,5 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
     }
 }
