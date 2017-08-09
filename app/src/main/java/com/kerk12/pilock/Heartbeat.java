@@ -36,7 +36,12 @@ public class Heartbeat {
         //Get the server's url from the shared preferences.
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-//        if ()
+        if (!CustomSSLTruster.DoesCertFileExist()){
+            Toast.makeText(context, context.getResources().getString(R.string.cert_file_not_exists), Toast.LENGTH_LONG).show();
+            listener.onHeartbeatFailure();
+            listener.onHeartbeatFinished();
+            return;
+        }
 
         try {
             url = new URL(sharedPreferences.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none"));

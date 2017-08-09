@@ -130,6 +130,8 @@ public class ChangePinActivity extends AppCompatActivity {
                 if (!(PINEntryActivity.ValidatePIN(newPin) && PINEntryActivity.ValidatePIN(oldPin)) ){
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
                     submitButton.setEnabled(true);
+                    newPinET.setEnabled(true);
+                    oldPinET.setEnabled(true);
                     return;
                 }
                 final ProgressDialog hbdial = ProgressDialog.show(ChangePinActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);

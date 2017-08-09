@@ -1,5 +1,6 @@
 package com.kerk12.pilock;
 
+import android.content.Context;
 import android.os.Environment;
 
 import java.io.BufferedInputStream;
@@ -31,6 +32,11 @@ public class CustomSSLTruster {
             return true;
         }
         return false;
+    }
+
+    public static boolean DoesCertFileExist(){
+        File cert = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "pilock.crt");
+        return cert.exists();
     }
 
     /**

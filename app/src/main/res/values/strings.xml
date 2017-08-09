@@ -38,4 +38,5 @@
     <string name="heartbeat">Heartbeat</string>
     <string name="heartbeat_text">Requesting Heartbeat...</string>
     <string name="version_err">Your app is outdated or the server software you are currently using is outdated. Please update both to the latest version.</string>
+    <string name="cert_file_not_exists">Certificate not found on root of internal storage/sdcard.</string>
 </resources>

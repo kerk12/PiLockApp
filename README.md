@@ -3,3 +3,5 @@
 Developed by Kyriakos Giannakis (kerk12gr@gmail.com).
 
 The app is responsible for interaction with the PiLock Server (Logging in, Unlocking, Changing PINs).
+
+For more info on installing and using the app, please refer to the Wiki Pages.
