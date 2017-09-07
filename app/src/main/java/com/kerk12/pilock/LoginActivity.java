@@ -20,6 +20,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,8 +48,12 @@ public class LoginActivity extends AppCompatActivity {
     String AuthToken = null;
     String tempPIN = null;
 
+    boolean request_passwordless = false;
+
+    TextView passwordless_warning;
     EditText usernameET, passwordET;
     Button loginButton;
+    CheckBox passwordless_CB;
 
     /**
      * Launches {@link PINEntryActivity}
@@ -135,27 +141,34 @@ public class LoginActivity extends AppCompatActivity {
             } else if (resp.getString("message").equals("CREATED")){
                 //If the profile was created successfully, get the returned AuthToken and the PIN
                 AuthToken = resp.getString(getResources().getString(R.string.auth_token_params));
-                tempPIN = resp.getString("pin");
-
+                if (!request_passwordless) {
+                    tempPIN = resp.getString("pin");
+                }
                 //Store the AuthToken...
                 SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
                 editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
+                if (request_passwordless) editor.putBoolean(PINEntryActivity.PASSWORDLESS_KEY, true);
                 editor.commit();
 
                 //Show the PIN to the user.
-                AlertDialog.Builder bob = new AlertDialog.Builder(LoginActivity.this);
-                LayoutInflater inflater = getLayoutInflater();
-                View v = inflater.inflate(R.layout.pin_dialog, null);
-                TextView pin_view = (TextView) v.findViewById(R.id.dialog_PIN);
+                if (!request_passwordless) {
+                    AlertDialog.Builder bob = new AlertDialog.Builder(LoginActivity.this);
+                    LayoutInflater inflater = getLayoutInflater();
+                    View v = inflater.inflate(R.layout.pin_dialog, null);
+                    TextView pin_view = (TextView) v.findViewById(R.id.dialog_PIN);
 
-                pin_view.setText(tempPIN);
-                bob.setView(v).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        LaunchPINEntryActivity();
-                    }
-                }).show();
+                    pin_view.setText(tempPIN);
+                    bob.setView(v).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            LaunchPINEntryActivity();
+                        }
+                    }).show();
+                } else {
+                    // TODO Display a message on PINless unlocks...
+                    LaunchPINEntryActivity();
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -193,7 +206,16 @@ public class LoginActivity extends AppCompatActivity {
         usernameET = (EditText) findViewById(R.id.login_username);
         passwordET = (EditText) findViewById(R.id.login_password);
         loginButton = (Button) findViewById(R.id.login_button);
+        passwordless_CB = (CheckBox) findViewById(R.id.paswwordless_cb);
+        passwordless_warning = (TextView) findViewById(R.id.pwless_warning);
 
+        passwordless_CB.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                request_passwordless = b;
+                passwordless_warning.setVisibility((b ? View.VISIBLE : View.GONE));
+            }
+        });
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,6 +255,9 @@ public class LoginActivity extends AppCompatActivity {
                             Map<String, String> params = new HashMap<String, String>();
                             params.put(getResources().getString(R.string.username_params), username);
                             params.put(getResources().getString(R.string.password_params), password);
+                            if (request_passwordless) {
+                                params.put("passwordless", "1");
+                            }
                             final HttpsPOST post = new HttpsPOST(LoginURL, params);
                             post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
                                 @Override

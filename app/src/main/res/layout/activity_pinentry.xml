@@ -7,7 +7,7 @@
     tools:context="com.kerk12.pilock.PINEntryActivity">
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/pin_entry_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
@@ -33,10 +33,10 @@
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+        app:layout_constraintTop_toBottomOf="@+id/pin_entry_capital" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/pin_entry_capital"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -46,7 +46,7 @@
         android:textSize="24sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
+        app:layout_constraintTop_toBottomOf="@+id/pin_entry_header"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp" />
 

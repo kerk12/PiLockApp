@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -33,6 +34,7 @@ public class PINEntryActivity extends AppCompatActivity {
     private String AuthToken = null;
     private String ServerURL = null;
     private String PIN = "";
+    private boolean passwordless_enabled = false;
 
     private void AnalyzeResult(String s) {
 
@@ -83,6 +85,8 @@ public class PINEntryActivity extends AppCompatActivity {
 
     EditText pinET;
     Button unlockButton;
+    TextView PinEntryHeader, PINCap;
+
 
     /**
      * Validates the given pin. Checks if the pin is of the right size and if it contains non numeric characters.
@@ -105,6 +109,8 @@ public class PINEntryActivity extends AppCompatActivity {
     }
 
     public static final String AUTH_TOKEN_KEY = "authToken";
+    public static final String PASSWORDLESS_KEY = "passwordless";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,26 +125,37 @@ public class PINEntryActivity extends AppCompatActivity {
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
         ServerURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
         AuthToken = authPrefs.getString(AUTH_TOKEN_KEY, "None");
+        passwordless_enabled = authPrefs.getBoolean(PASSWORDLESS_KEY, false);
 
         // Set up the layout.
+        PinEntryHeader = (TextView) findViewById(R.id.pin_entry_header);
+        PINCap = (TextView) findViewById(R.id.pin_entry_capital);
+
+
+
         pinET = (EditText) findViewById(R.id.pin);
-        pinET.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        if (!passwordless_enabled) {
+            pinET.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
+                }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                PIN = s.toString();
-            }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    PIN = s.toString();
+                }
 
-            @Override
-            public void afterTextChanged(Editable s) {
+                @Override
+                public void afterTextChanged(Editable s) {
 
-            }
-        });
-
+                }
+            });
+        } else {
+            pinET.setVisibility(View.GONE);
+            PINCap.setVisibility(View.GONE);
+            PinEntryHeader.setText(getResources().getString(R.string.passwordless_pin_entry_header));
+        }
 
         unlockButton = (Button) findViewById(R.id.unlock_button);
         unlockButton.setOnClickListener(new View.OnClickListener() {
@@ -147,7 +164,7 @@ public class PINEntryActivity extends AppCompatActivity {
 
                 unlockButton.setEnabled(false);
                 pinET.setEnabled(false);
-                if (!ValidatePIN(PIN)) {
+                if (!passwordless_enabled && !ValidatePIN(PIN)) {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
                     unlockButton.setEnabled(true);
                     pinET.setEnabled(true);
@@ -168,7 +185,7 @@ public class PINEntryActivity extends AppCompatActivity {
 
                         Map<String, String> params = new HashMap<String, String>();
                         params.put(getResources().getString(R.string.auth_token_params), AuthToken);
-                        params.put(getResources().getString(R.string.pin_params), PIN);
+                        if (!passwordless_enabled) params.put(getResources().getString(R.string.pin_params), PIN);
 
                         final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
                         final HttpsPOST post = new HttpsPOST(unlockURL, params);
@@ -216,8 +233,11 @@ public class PINEntryActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.change_pin_menu_choice:
-                Intent i = new Intent(this, ChangePinActivity.class);
-                startActivity(i);
+                if (!passwordless_enabled) {
+                    Intent i = new Intent(this, ChangePinActivity.class);
+                    startActivity(i);
+                } else
+                    Toast.makeText(getApplicationContext(), getResources().getText(R.string.change_pin_not_allowed), Toast.LENGTH_LONG).show();
                 return true;
             case R.id.change_pin_about:
                 LoginActivity.ShowAboutDialog(PINEntryActivity.this);

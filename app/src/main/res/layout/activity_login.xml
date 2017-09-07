@@ -58,6 +58,23 @@
             android:ems="10"
             android:hint="@string/password"
             android:inputType="textPassword" />
+
+        <CheckBox
+            android:id="@+id/paswwordless_cb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/passwordless_unlock"
+            />
+
+        <TextView
+            android:id="@+id/pwless_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/passwordless_warning"
+            android:textColor="@android:color/holo_red_dark"
+            android:visibility="gone" />
     </LinearLayout>
 
     <Button
