@@ -47,7 +47,7 @@ public class Heartbeat {
             url = new URL(sharedPreferences.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none"));
 
             //Perform a GET request to the root page.
-            final HttpsGET get = new HttpsGET(url, true);
+            final HttpsGET get = new HttpsGET(url, false);
             // Requires a rather connect and read timeout as the raspi zero is slow enough...
             get.setConnectTimeout(15000);
             get.setReadTimeout(15000);

@@ -33,8 +33,6 @@ public class HttpsPOST extends HttpsRequest{
 
 
 
-
-
     /**
      * Default constructor. Takes the server page's URL, along with the mapped data.
      * @param url The Page URL that the POST request will be performed to.
@@ -42,6 +40,16 @@ public class HttpsPOST extends HttpsRequest{
      */
     public HttpsPOST(URL url, Map<String, String> params) {
         super(url, params);
+    }
+
+    /**
+     * Default constructor. Takes the server page's URL, along with the mapped data.
+     * @param url The Page URL that the POST request will be performed to.
+     * @param params The data parameters, mapped as String key=value pairs. See {@link QueryBuilder} for more.
+     * @param needswifi Boolean to indicate whether the user needs to be on WiFi for the request to execute properly.
+     */
+    public HttpsPOST(URL url, Map<String, String> params, boolean needswifi) {
+        super(url, params, needswifi);
     }
 
     private class POSTTask extends AsyncTask<Void, Void, String>{
