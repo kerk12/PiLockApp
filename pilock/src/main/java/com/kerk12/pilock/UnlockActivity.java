@@ -35,7 +35,6 @@ public class UnlockActivity extends Activity {
         Wearable.MessageApi.sendMessage(mClient, mNode.getId(), START_ACTIVITY, message.getBytes()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
             @Override
             public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
-
             }
         });
     }

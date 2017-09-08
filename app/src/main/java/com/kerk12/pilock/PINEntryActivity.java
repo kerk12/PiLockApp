@@ -188,13 +188,22 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         setContentView(R.layout.activity_pinentry);
 
         isHeadless = getIntent().getBooleanExtra(HEADLESS_EXTRA, false);
+
+
         /*
          * Initialize the auth token and server url.
          */
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
+
         ServerURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
         AuthToken = authPrefs.getString(AUTH_TOKEN_KEY, "None");
+        if (AuthToken.equals("None")){
+            finish();
+            moveTaskToBack(true);
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(1);
+        }
         passwordless_enabled = authPrefs.getBoolean(PASSWORDLESS_KEY, false);
 
         // Set up the layout.
