@@ -18,6 +18,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,12 +32,15 @@ import java.util.Map;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 
-public class PINEntryActivity extends AppCompatActivity {
+public class PINEntryActivity extends AppCompatActivity implements MessageApi.MessageListener{
 
     private String AuthToken = null;
     private String ServerURL = null;
     private String PIN = "";
     private boolean passwordless_enabled = false;
+    private boolean isHeadless = false;
+
+    public static final String HEADLESS_EXTRA = "com.kerk12.pilock.unlock.headless";
 
     private void AnalyzeResult(String s) {
 
@@ -48,6 +54,69 @@ public class PINEntryActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         
+    }
+
+    private void sendUnlock(final boolean headless){
+        unlockButton.setEnabled(false);
+        pinET.setEnabled(false);
+        if (!passwordless_enabled && !ValidatePIN(PIN)) {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
+            unlockButton.setEnabled(true);
+            pinET.setEnabled(true);
+            return;
+        }
+        final ProgressDialog hbdial = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
+        Heartbeat hb = new Heartbeat();
+        hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
+            @Override
+            public void onHeartbeatSuccess() {
+                URL unlockURL = null;
+                try {
+                    unlockURL = new URL(ServerURL+"/authentication");
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+
+                Map<String, String> params = new HashMap<String, String>();
+                params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                if (!passwordless_enabled) params.put(getResources().getString(R.string.pin_params), PIN);
+
+                final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
+                final HttpsPOST post = new HttpsPOST(unlockURL, params);
+                post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
+                    @Override
+                    public void onRequestCompleted() {
+                        PerformAfterPOSTCheck(post);
+                        dialog.dismiss();
+                        unlockButton.setEnabled(true);
+                        pinET.setEnabled(true);
+                        pinET.setText("");
+                        if (headless){
+                            finish();
+                            moveTaskToBack(true);
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                            System.exit(1);
+                        }
+                    }
+                });
+                post.SendPOST(getApplicationContext());
+            }
+
+            @Override
+            public void onHeartbeatFailure() {
+                hbdial.dismiss();
+                unlockButton.setEnabled(true);
+                pinET.setEnabled(true);
+            }
+
+            @Override
+            public void onHeartbeatFinished() {
+
+            }
+        });
+        hb.SendHeartbeat(getApplicationContext());
+
     }
 
     private void PerformAfterPOSTCheck(HttpsPOST post){
@@ -118,6 +187,7 @@ public class PINEntryActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_pinentry);
 
+        isHeadless = getIntent().getBooleanExtra(HEADLESS_EXTRA, false);
         /*
          * Initialize the auth token and server url.
          */
@@ -161,64 +231,13 @@ public class PINEntryActivity extends AppCompatActivity {
         unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                unlockButton.setEnabled(false);
-                pinET.setEnabled(false);
-                if (!passwordless_enabled && !ValidatePIN(PIN)) {
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
-                    unlockButton.setEnabled(true);
-                    pinET.setEnabled(true);
-                    return;
-                }
-                final ProgressDialog hbdial = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
-                Heartbeat hb = new Heartbeat();
-                hb.setHeartbeatListener(new Heartbeat.HeartbeatListener() {
-                    @Override
-                    public void onHeartbeatSuccess() {
-                        URL unlockURL = null;
-                        try {
-                            unlockURL = new URL(ServerURL+"/authentication");
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-
-
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put(getResources().getString(R.string.auth_token_params), AuthToken);
-                        if (!passwordless_enabled) params.put(getResources().getString(R.string.pin_params), PIN);
-
-                        final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
-                        final HttpsPOST post = new HttpsPOST(unlockURL, params);
-                        post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
-                            @Override
-                            public void onRequestCompleted() {
-                                PerformAfterPOSTCheck(post);
-                                dialog.dismiss();
-                                unlockButton.setEnabled(true);
-                                pinET.setEnabled(true);
-                                pinET.setText("");
-                            }
-                        });
-                        post.SendPOST(getApplicationContext());
-                    }
-
-                    @Override
-                    public void onHeartbeatFailure() {
-                        hbdial.dismiss();
-                        unlockButton.setEnabled(true);
-                        pinET.setEnabled(true);
-                    }
-
-                    @Override
-                    public void onHeartbeatFinished() {
-
-                    }
-                });
-                hb.SendHeartbeat(getApplicationContext());
-
-
+                sendUnlock(false);
             }
         });
+
+        if (isHeadless){
+            sendUnlock(true);
+        }
 
     }
 
@@ -244,5 +263,11 @@ public class PINEntryActivity extends AppCompatActivity {
                 return true;
         }
         return false;
+    }
+
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+
     }
 }
