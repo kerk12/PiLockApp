@@ -9,4 +9,8 @@
         android:id="@+id/change_pin_about"
         android:title="About"
         />
+    <item
+        android:id="@+id/sync_watch_choice"
+        android:title="Sync with Android Wear"
+        />
 </menu>

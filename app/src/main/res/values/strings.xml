@@ -43,4 +43,7 @@
     <string name="passwordless_warning">WARNING: Enabling PINless unlocks can be insecure in case your phone gets stolen. It is recommended to enable PINless unlocks ONLY when using an Android Wear device.</string>
     <string name="change_pin_not_allowed">PIN Changing not allowed: PINless unlocks have been enabled.</string>
     <string name="passwordless_pin_entry_header">Click the UNLOCK button to send an unlock signal.</string>
+    <string name="synced_successfully">Synced with Android Wear successfully!</string>
+    <string name="connected_to_wear">Connected with an Android Wear device!</string>
+    <string name="no_nearby_nodes">No nearby wear devices were detected.</string>
 </resources>

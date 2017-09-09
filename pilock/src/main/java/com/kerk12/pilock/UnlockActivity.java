@@ -1,6 +1,7 @@
 package com.kerk12.pilock;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -26,13 +28,14 @@ public class UnlockActivity extends Activity {
 
     boolean isConnected = false;
 
+    private String WearToken;
     Node mNode = null;
 
-    private static final String START_ACTIVITY = "/start_activity";
+    public static final String START_ACTIVITY = "/start_activity";
     private static final String UNLOCK = "/unlock";
 
     private void sendMessage(final String action, final String message){
-        Wearable.MessageApi.sendMessage(mClient, mNode.getId(), START_ACTIVITY, message.getBytes()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+        Wearable.MessageApi.sendMessage(mClient, mNode.getId(), action, message.getBytes()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
             @Override
             public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
             }
@@ -49,6 +52,12 @@ public class UnlockActivity extends Activity {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 unlock_icon = (ImageView) stub.findViewById(R.id.unlock_icon);
+
+                SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
+                WearToken = authPrefs.getString("wearToken", "None");
+
+
+
                 mClient = new GoogleApiClient.Builder(getApplicationContext())
                         .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                             @Override
@@ -79,8 +88,15 @@ public class UnlockActivity extends Activity {
                 unlock_icon.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        if (WearToken.equals("None")){
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_synced), Toast.LENGTH_LONG).show();
+                            return;
+                        }
                         if (isConnected && mNode != null){
-                            sendMessage(START_ACTIVITY, "asdf");
+                            sendMessage(UNLOCK, WearToken);
+                            Toast.makeText(getApplicationContext(), getString(R.string.unlock_request_sent), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.could_not_connect_to_phone), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
