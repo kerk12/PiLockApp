@@ -434,6 +434,8 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
                         }
                     });
                     hb.SendHeartbeat(getApplicationContext());
+                } else {
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_connected_to_wear), Toast.LENGTH_SHORT).show();
                 }
                 return true;
             case R.id.change_pin_about:

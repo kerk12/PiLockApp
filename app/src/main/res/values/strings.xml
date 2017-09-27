@@ -46,4 +46,5 @@
     <string name="synced_successfully">Synced with Android Wear successfully!</string>
     <string name="connected_to_wear">Connected with an Android Wear device!</string>
     <string name="no_nearby_nodes">No nearby wear devices were detected.</string>
+    <string name="not_connected_to_wear">No connected Android Wear devices were detected.</string>
 </resources>
