@@ -40,7 +40,7 @@
     <string name="version_err">Your app is outdated or the server software you are currently using is outdated. Please update both to the latest version.</string>
     <string name="cert_file_not_exists">Certificate not found on root of internal storage/sdcard.</string>
     <string name="passwordless_unlock">Enable PINless unlocks.</string>
-    <string name="passwordless_warning">WARNING: Enabling PINless unlocks can be insecure in case your phone gets stolen. It is recommended to enable PINless unlocks ONLY when using an Android Wear device.</string>
+    <string name="passwordless_warning">WARNING: Enabling PINless unlocks can be insecure in case your phone gets stolen.</string>
     <string name="change_pin_not_allowed">PIN Changing not allowed: PINless unlocks have been enabled.</string>
     <string name="passwordless_pin_entry_header">Click the UNLOCK button to send an unlock signal.</string>
     <string name="synced_successfully">Synced with Android Wear successfully!</string>
