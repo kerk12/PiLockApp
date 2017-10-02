@@ -309,7 +309,7 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
 
         ServerURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
-        Device_Profile_Id = sharedPrefs.getInt(PROFILE_ID_KEY, -1);
+        Device_Profile_Id = authPrefs.getInt(PROFILE_ID_KEY, -1);
         AuthToken = authPrefs.getString(AUTH_TOKEN_KEY, "None");
         if (AuthToken.equals("None")){
             finish();
