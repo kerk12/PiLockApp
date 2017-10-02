@@ -42,6 +42,7 @@ import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 public class PINEntryActivity extends AppCompatActivity implements MessageApi.MessageListener{
 
     private String AuthToken = null;
+    private int Device_Profile_Id;
     private String ServerURL = null;
     private String PIN = "";
     private boolean passwordless_enabled = false;
@@ -136,6 +137,7 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
 
                 Map<String, String> params = new HashMap<String, String>();
                 params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                params.put(getResources().getString(R.string.profile_id_params), String.valueOf(Device_Profile_Id));
                 if (!passwordless_enabled && isHeadless){
                     params.put("wearToken", wearToken);
                 } else if (!passwordless_enabled) params.put(getResources().getString(R.string.pin_params), PIN);
@@ -269,6 +271,7 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
     }
 
     public static final String AUTH_TOKEN_KEY = "authToken";
+    public static final String PROFILE_ID_KEY = "device_profile_id";
     public static final String PASSWORDLESS_KEY = "passwordless";
 
     @Override
@@ -306,6 +309,7 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
 
         ServerURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "none");
+        Device_Profile_Id = sharedPrefs.getInt(PROFILE_ID_KEY, -1);
         AuthToken = authPrefs.getString(AUTH_TOKEN_KEY, "None");
         if (AuthToken.equals("None")){
             finish();
@@ -394,6 +398,7 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
                             }
                             Map<String, String> params = new HashMap<String, String>();
                             params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                            params.put(getResources().getString(R.string.profile_id_params), String.valueOf(Device_Profile_Id));
                             params.put(getResources().getString(R.string.pin_params), PIN);
 
                             final HttpsPOST post = new HttpsPOST(wearTokenURL, params, false);

@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     String password = null;
 
     String AuthToken = null;
+    int Device_Profile_ID;
     String tempPIN = null;
 
     boolean request_passwordless = false;
@@ -141,6 +142,7 @@ public class LoginActivity extends AppCompatActivity {
             } else if (resp.getString("message").equals("CREATED")){
                 //If the profile was created successfully, get the returned AuthToken and the PIN
                 AuthToken = resp.getString(getResources().getString(R.string.auth_token_params));
+                Device_Profile_ID = Integer.valueOf(resp.getString(getResources().getString(R.string.profile_id_params)));
                 if (!request_passwordless) {
                     tempPIN = resp.getString("pin");
                 }
@@ -148,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                 SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
                 editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
+                editor.putInt(PINEntryActivity.PROFILE_ID_KEY, Device_Profile_ID);
                 if (request_passwordless) editor.putBoolean(PINEntryActivity.PASSWORDLESS_KEY, true);
                 editor.commit();
 

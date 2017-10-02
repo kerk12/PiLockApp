@@ -37,6 +37,7 @@ public class ChangePinActivity extends AppCompatActivity {
     String oldPin, newPin = "";
     String ChangePinURL = null;
     String AuthToken = null;
+    int Device_Profile_Id;
 
     private void PerformAfterPostCheck(HttpsPOST post){
         if (post.hasError()){
@@ -82,6 +83,7 @@ public class ChangePinActivity extends AppCompatActivity {
 
         ChangePinURL = sharedPrefs.getString(SettingsActivity.SERVER_ADDRESS_KEY, "")+"/changepin";
         AuthToken = authPrefs.getString(getResources().getString(R.string.auth_token_params), "");
+        Device_Profile_Id = authPrefs.getInt(PINEntryActivity.PROFILE_ID_KEY, -1);
 
         //Wire them to the layout...
         oldPinET = (EditText) findViewById(R.id.CP_old_pin);
@@ -145,6 +147,7 @@ public class ChangePinActivity extends AppCompatActivity {
                             URL changePinURL = new URL(ChangePinURL);
                             Map<String, String> params = new HashMap<String, String>();
                             params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                            params.put(getResources().getString(R.string.profile_id_params), String.valueOf(Device_Profile_Id));
                             params.put("oldPin", oldPin);
                             params.put("newPin", newPin);
 
