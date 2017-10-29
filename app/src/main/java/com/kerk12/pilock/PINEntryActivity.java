@@ -136,7 +136,9 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
 
 
                 Map<String, String> params = new HashMap<String, String>();
-                params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                KeystoreHelper helper = new KeystoreHelper(getApplicationContext());
+                String authToken_dec = helper.Decrypt(AuthToken);
+                params.put(getResources().getString(R.string.auth_token_params), authToken_dec);
                 params.put(getResources().getString(R.string.profile_id_params), String.valueOf(Device_Profile_Id));
                 if (!passwordless_enabled && isHeadless){
                     params.put("wearToken", wearToken);
@@ -397,7 +399,9 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
                                 e.printStackTrace();
                             }
                             Map<String, String> params = new HashMap<String, String>();
-                            params.put(getResources().getString(R.string.auth_token_params), AuthToken);
+                            KeystoreHelper helper = new KeystoreHelper(getApplicationContext());
+                            String authToken_dec = helper.Decrypt(AuthToken);
+                            params.put(getResources().getString(R.string.auth_token_params), authToken_dec);
                             params.put(getResources().getString(R.string.profile_id_params), String.valueOf(Device_Profile_Id));
                             params.put(getResources().getString(R.string.pin_params), PIN);
 

@@ -149,7 +149,9 @@ public class LoginActivity extends AppCompatActivity {
                 //Store the AuthToken...
                 SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, AuthToken);
+                KeystoreHelper helper = new KeystoreHelper(getApplicationContext());
+                String enc_auth = helper.Encrypt(AuthToken);
+                editor.putString(PINEntryActivity.AUTH_TOKEN_KEY, enc_auth);
                 editor.putInt(PINEntryActivity.PROFILE_ID_KEY, Device_Profile_ID);
                 if (request_passwordless) editor.putBoolean(PINEntryActivity.PASSWORDLESS_KEY, true);
                 editor.commit();
