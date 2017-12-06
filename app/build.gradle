@@ -7,8 +7,8 @@ android {
         applicationId "com.kerk12.pilock"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 4
-        versionName "0.3-beta"
+        versionCode 5
+        versionName "0.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -19,6 +19,9 @@ android {
         debug {
             minifyEnabled false
         }
+    }
+    lintOptions {
+        checkReleaseBuilds false
     }
 }
 
