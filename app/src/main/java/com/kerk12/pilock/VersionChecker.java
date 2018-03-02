@@ -5,7 +5,7 @@ package com.kerk12.pilock;
  */
 
 public class VersionChecker {
-    private static String LatestServerVersion = "0.3.0";
+    private static String LatestServerVersion = "0.3.1";
 
     /**
      * Checks whether the app being run is the latest version for the server currently being used.
