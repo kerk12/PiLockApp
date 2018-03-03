@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -71,6 +72,21 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         });
     }
 
+    /**
+     * Enables and disables a specific view or viewgroup.
+     * @param v The view or viewgroup which will be enabled or disabled.
+     * @param enable Whether the view or viewgroup will be enabled or disabled.
+     */
+    public static void EnableDisableControls(View v, boolean enable){
+        if (v instanceof ViewGroup){
+            ViewGroup vg = (ViewGroup) v;
+            for (int i = 0; i < vg.getChildCount(); i++){
+                EnableDisableControls(vg.getChildAt(i), enable);
+            }
+        } else
+            v.setEnabled(enable);
+    }
+
     private void sendMessage(final String action, final String message){
         Wearable.MessageApi.sendMessage(mClient, mNode.getId(), action, message.getBytes()).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
             @Override
@@ -88,9 +104,8 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
 
         try {
             JSONObject response = new JSONObject(s);
-            if (response.getString("message").equals("SUCCESS")){
+            if (response.getString("message").equals("SUCCESS"))
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.access_granted), Toast.LENGTH_LONG).show();
-            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -112,15 +127,15 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
     }
 
     private void sendUnlock(final boolean headless){
-        unlockButton.setEnabled(false);
-        pinET.setEnabled(false);
-        if (!isHeadless) {
-            if (!passwordless_enabled && !ValidatePIN(PIN)) {
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
-                unlockButton.setEnabled(true);
-                pinET.setEnabled(true);
-                return;
-            }
+//        unlockButton.setEnabled(false);
+//        pinET.setEnabled(false);
+        EnableDisableControls(findViewById(R.id.pin_entry_layout), false);
+        if (!isHeadless && !passwordless_enabled && !ValidatePIN(PIN)) {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
+//            unlockButton.setEnabled(true);
+//            pinET.setEnabled(true);
+            EnableDisableControls(findViewById(R.id.pin_entry_layout), true);
+            return;
         }
         final ProgressDialog hbdial = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
         Heartbeat hb = new Heartbeat();
@@ -140,9 +155,10 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
                 String authToken_dec = helper.Decrypt(AuthToken);
                 params.put(getResources().getString(R.string.auth_token_params), authToken_dec);
                 params.put(getResources().getString(R.string.profile_id_params), String.valueOf(Device_Profile_Id));
-                if (!passwordless_enabled && isHeadless){
+                if (!passwordless_enabled && isHeadless)
                     params.put("wearToken", wearToken);
-                } else if (!passwordless_enabled) params.put(getResources().getString(R.string.pin_params), PIN);
+                else if (!passwordless_enabled)
+                    params.put(getResources().getString(R.string.pin_params), PIN);
 
                 final ProgressDialog dialog = ProgressDialog.show(PINEntryActivity.this, getResources().getString(R.string.wait_dialog_title), getResources().getString(R.string.wait_dialog), true, false);
                 final HttpsPOST post = new HttpsPOST(unlockURL, params);
@@ -151,8 +167,10 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
                     public void onRequestCompleted() {
                         PerformAfterPOSTCheck(post);
                         dialog.dismiss();
-                        unlockButton.setEnabled(true);
-                        pinET.setEnabled(true);
+//                        unlockButton.setEnabled(true);
+//                        pinET.setEnabled(true);
+                        EnableDisableControls(findViewById(R.id.pin_entry_layout), true);
+
                         pinET.setText("");
                         if (headless){
                             finish();
@@ -168,8 +186,8 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
             @Override
             public void onHeartbeatFailure() {
                 hbdial.dismiss();
-                unlockButton.setEnabled(true);
-                pinET.setEnabled(true);
+                EnableDisableControls(findViewById(R.id.pin_entry_layout), true);
+
             }
 
             @Override
@@ -258,18 +276,8 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
      * @return True if the pin is valid, false if it's not.
      */
     public static boolean ValidatePIN(String pin){
-        //Check the length. It needs to be exactly 6 characters long.
-        if(pin.length() != 6){
-            return false;
-        }
         //Check for non-numeric characters.
-        char[] pinChars = pin.toCharArray();
-        for (char c : pinChars){
-            if (!Character.isDigit(c)){
-                return false;
-            }
-        }
-        return true;
+        return pin.matches("^[0-9]{6}$");
     }
 
     public static final String AUTH_TOKEN_KEY = "authToken";
@@ -279,10 +287,9 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set the SECURE flag, to prevent screenshots and background snapshots.
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_pinentry);
 
+        // Create a new GAPI Client, to sync with android wear.
         mClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
@@ -300,9 +307,8 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         mClient.connect();
         isHeadless = getIntent().getBooleanExtra(HEADLESS_EXTRA, false);
 
-        if (isHeadless){
+        if (isHeadless)
             wearToken = getIntent().getStringExtra(WEAR_TOKEN);
-        }
 
         /*
          * Initialize the auth token and server url.
@@ -331,19 +337,13 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         if (!passwordless_enabled) {
             pinET.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     PIN = s.toString();
                 }
-
                 @Override
-                public void afterTextChanged(Editable s) {
-
-                }
+                public void afterTextChanged(Editable s) {}
             });
         } else {
             pinET.setVisibility(View.GONE);
@@ -352,16 +352,11 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
         }
 
         unlockButton = (Button) findViewById(R.id.unlock_button);
-        unlockButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendUnlock(false);
-            }
-        });
+        unlockButton.setOnClickListener((View v) -> { sendUnlock(false); });
 
-        if (isHeadless){
+        if (isHeadless)
             sendUnlock(true);
-        }
+
 
     }
 
@@ -433,19 +428,15 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
                         }
 
                         @Override
-                        public void onHeartbeatFailure() {
-
-                        }
+                        public void onHeartbeatFailure() {}
 
                         @Override
-                        public void onHeartbeatFinished() {
-
-                        }
+                        public void onHeartbeatFinished() {}
                     });
                     hb.SendHeartbeat(getApplicationContext());
-                } else {
+                } else
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_connected_to_wear), Toast.LENGTH_SHORT).show();
-                }
+
                 return true;
             case R.id.change_pin_about:
                 LoginActivity.ShowAboutDialog(PINEntryActivity.this);
@@ -456,14 +447,11 @@ public class PINEntryActivity extends AppCompatActivity implements MessageApi.Me
 
     @Override
     protected void onDestroy() {
-        if (mClient.isConnected()){
+        if (mClient.isConnected())
             mClient.disconnect();
-        }
         super.onDestroy();
     }
 
     @Override
-    public void onMessageReceived(MessageEvent messageEvent) {
-
-    }
+    public void onMessageReceived(MessageEvent messageEvent) {}
 }
