@@ -30,11 +30,10 @@ public class QueryBuilder {
 
         boolean first = true;
         for (Map.Entry<String,String> entry: queryMap.entrySet()){
-            if (first){
+            if (first)
                 first = false;
-            } else {
+            else
                 sb.append("&");
-            }
 
             sb.append(URLEncoder.encode(entry.getKey(), "UTF-8") + "="+URLEncoder.encode(entry.getValue(), "UTF-8"));
         }

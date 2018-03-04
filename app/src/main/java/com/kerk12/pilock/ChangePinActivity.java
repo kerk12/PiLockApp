@@ -40,6 +40,7 @@ public class ChangePinActivity extends AppCompatActivity {
     int Device_Profile_Id;
 
     private void PerformAfterPostCheck(HttpsPOST post){
+
         if (post.hasError()){
             switch (post.getError()){
                 case INVALID_CERTIFICATE:
@@ -67,9 +68,7 @@ public class ChangePinActivity extends AppCompatActivity {
                     break;
             }
         }
-        submitButton.setEnabled(true);
-        newPinET.setEnabled(true);
-        oldPinET.setEnabled(true);
+        PINEntryActivity.EnableDisableControls(findViewById(R.id.change_pin_layout), true);
     }
 
     @Override
@@ -89,9 +88,7 @@ public class ChangePinActivity extends AppCompatActivity {
         oldPinET = (EditText) findViewById(R.id.CP_old_pin);
         oldPinET.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -99,16 +96,12 @@ public class ChangePinActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
         newPinET = (EditText) findViewById(R.id.CP_new_pin);
         newPinET.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -116,24 +109,18 @@ public class ChangePinActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
         submitButton = (Button) findViewById(R.id.CP_button);
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Disable the button temporarily
-                submitButton.setEnabled(false);
-                newPinET.setEnabled(false);
-                oldPinET.setEnabled(false);
+                // Disable all the controls.
+                PINEntryActivity.EnableDisableControls(findViewById(R.id.change_pin_layout), false);
                 if (!(PINEntryActivity.ValidatePIN(newPin) && PINEntryActivity.ValidatePIN(oldPin)) ){
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_pin_entered), Toast.LENGTH_LONG).show();
-                    submitButton.setEnabled(true);
-                    newPinET.setEnabled(true);
-                    oldPinET.setEnabled(true);
+                    PINEntryActivity.EnableDisableControls(findViewById(R.id.change_pin_layout), true);
                     return;
                 }
                 final ProgressDialog hbdial = ProgressDialog.show(ChangePinActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
@@ -143,6 +130,8 @@ public class ChangePinActivity extends AppCompatActivity {
                     @Override
                     public void onHeartbeatSuccess() {
                         hbdial.dismiss();
+                        final ProgressDialog cpdial = ProgressDialog.show(ChangePinActivity.this, getResources().getString(R.string.changing_pin), getResources().getString(R.string.please_wait), true, false);
+
                         try {
                             URL changePinURL = new URL(ChangePinURL);
                             Map<String, String> params = new HashMap<String, String>();
@@ -154,15 +143,7 @@ public class ChangePinActivity extends AppCompatActivity {
                             params.put("newPin", newPin);
 
                             final HttpsPOST post = new HttpsPOST(changePinURL, params);
-                            post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
-                                @Override
-                                public void onRequestCompleted() {
-                                    PerformAfterPostCheck(post);
-                                    submitButton.setEnabled(true);
-                                    newPinET.setEnabled(true);
-                                    oldPinET.setEnabled(true);
-                                }
-                            });
+                            post.setRequestListener(() -> { cpdial.dismiss(); PerformAfterPostCheck(post); });
                             post.SendPOST(getApplicationContext());
 
                         } catch (MalformedURLException e) {
@@ -173,18 +154,13 @@ public class ChangePinActivity extends AppCompatActivity {
                     @Override
                     public void onHeartbeatFailure() {
                         hbdial.dismiss();
-                        submitButton.setEnabled(true);
-                        newPinET.setEnabled(true);
-                        oldPinET.setEnabled(true);
+                        PINEntryActivity.EnableDisableControls(findViewById(R.id.change_pin_layout), true);
                     }
 
                     @Override
-                    public void onHeartbeatFinished() {
-
-                    }
+                    public void onHeartbeatFinished() {}
                 });
                 hb.SendHeartbeat(getApplicationContext());
-
 
             }
         });

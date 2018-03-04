@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context="com.kerk12.pilock.ChangePinActivity"
     tools:layout_editor_absoluteY="81dp"
-    tools:layout_editor_absoluteX="0dp">
+    tools:layout_editor_absoluteX="0dp"
+    android:id="@+id/change_pin_layout">
 
     <TextView
         android:id="@+id/textView"
