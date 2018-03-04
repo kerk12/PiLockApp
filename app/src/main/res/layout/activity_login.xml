@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.kerk12.pilock.LoginActivity">
+    tools:context="com.kerk12.pilock.LoginActivity"
+    android:id="@+id/login_layout">
 
     <ImageView
         android:id="@+id/logo_view"

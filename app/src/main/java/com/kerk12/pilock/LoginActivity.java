@@ -74,9 +74,8 @@ public class LoginActivity extends AppCompatActivity {
     public static boolean CheckForExtStorageReadPerm(Context context){
         int permCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
 
-        if (permCheck == PackageManager.PERMISSION_GRANTED){
+        if (permCheck == PackageManager.PERMISSION_GRANTED)
             return true;
-        }
         return false;
     }
 
@@ -135,17 +134,15 @@ public class LoginActivity extends AppCompatActivity {
                 bob.setMessage(getResources().getString(R.string.profile_already_registered))
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
+                            public void onClick(DialogInterface dialog, int which) {}
                         }).show();
             } else if (resp.getString("message").equals("CREATED")){
                 //If the profile was created successfully, get the returned AuthToken and the PIN
                 AuthToken = resp.getString(getResources().getString(R.string.auth_token_params));
                 Device_Profile_ID = Integer.valueOf(resp.getString(getResources().getString(R.string.profile_id_params)));
-                if (!request_passwordless) {
+                if (!request_passwordless)
                     tempPIN = resp.getString("pin");
-                }
+
                 //Store the AuthToken...
                 SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
@@ -198,15 +195,15 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         //Make sure permission is granted to read external storage.
-        if (!CheckForExtStorageReadPerm(getApplicationContext())){
+        if (!CheckForExtStorageReadPerm(getApplicationContext()))
             reqPerms();
-        }
+
 
         //Check if the AuthToken is stored in the device. If it is, launch the PINEntryActivity.
         SharedPreferences authPrefs = getSharedPreferences(getResources().getString(R.string.auth_prefs), MODE_PRIVATE);
-        if (!authPrefs.getString(PINEntryActivity.AUTH_TOKEN_KEY, "").equals("")){
+        if (!authPrefs.getString(PINEntryActivity.AUTH_TOKEN_KEY, "").equals(""))
             LaunchPINEntryActivity();
-        }
+
 
         usernameET = (EditText) findViewById(R.id.login_username);
         passwordET = (EditText) findViewById(R.id.login_password);
@@ -225,13 +222,10 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                loginButton.setEnabled(false);
-                usernameET.setEnabled(false);
-                passwordET.setEnabled(false);
+                PINEntryActivity.EnableDisableControls(findViewById(R.id.login_layout), false);
                 if (!CheckForExtStorageReadPerm(getApplicationContext())) {
                     reqPerms();
-                    loginButton.setEnabled(true);
+                    PINEntryActivity.EnableDisableControls(findViewById(R.id.login_layout), true);
                     return;
                 }
                 final ProgressDialog hbdial = ProgressDialog.show(LoginActivity.this, getResources().getString(R.string.heartbeat), getResources().getString(R.string.heartbeat_text), true, false);
@@ -246,12 +240,11 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (!ValidateCredentials(username, password)){
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.please_enter_username_and_password), Toast.LENGTH_LONG).show();
-                            loginButton.setEnabled(true);
-                            usernameET.setEnabled(true);
-                            passwordET.setEnabled(true);
+                            PINEntryActivity.EnableDisableControls(findViewById(R.id.login_layout), true);
                             return;
                         }
 
+                        final ProgressDialog logdial = ProgressDialog.show(LoginActivity.this, getResources().getString(R.string.login), getResources().getString(R.string.login_text), true, false);
 
                         try {
 
@@ -260,16 +253,16 @@ public class LoginActivity extends AppCompatActivity {
                             Map<String, String> params = new HashMap<String, String>();
                             params.put(getResources().getString(R.string.username_params), username);
                             params.put(getResources().getString(R.string.password_params), password);
-                            if (request_passwordless) {
+                            if (request_passwordless)
                                 params.put("passwordless", "1");
-                            }
+
                             final HttpsPOST post = new HttpsPOST(LoginURL, params);
                             post.setRequestListener(new HttpsPOST.HttpsRequestListener() {
                                 @Override
                                 public void onRequestCompleted() {
+                                    logdial.dismiss();
                                     PerformAfterPOSTCheck(post);
-                                    usernameET.setEnabled(true);
-                                    passwordET.setEnabled(true);
+                                    PINEntryActivity.EnableDisableControls(findViewById(R.id.login_layout), true);
                                     passwordET.setText("");
                                 }
                             });
@@ -279,23 +272,18 @@ public class LoginActivity extends AppCompatActivity {
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         } finally {
-                            loginButton.setEnabled(true);
+                            PINEntryActivity.EnableDisableControls(findViewById(R.id.login_layout), true);
                         }
                     }
 
                     @Override
                     public void onHeartbeatFailure() {
                         hbdial.dismiss();
-                        loginButton.setEnabled(true);
-                        usernameET.setEnabled(true);
-                        passwordET.setEnabled(true);
+                        PINEntryActivity.EnableDisableControls(findViewById(R.id.login_layout), true);
                     }
 
                     @Override
-                    public void onHeartbeatFinished() {
-
-
-                    }
+                    public void onHeartbeatFinished() {}
                 });
                 hb.SendHeartbeat(getApplicationContext());
 
@@ -344,9 +332,7 @@ public class LoginActivity extends AppCompatActivity {
                 .setMessage(context.getResources().getString(R.string.about_message))
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
+                    public void onClick(DialogInterface dialog, int which) {}
                 }).show();
     }
 }
